@@ -23,7 +23,7 @@ class camera {
         void render(const hittable& world) {
             initialize();
 
-            // and namy other...
+            // and many other...
 
             std::clog << "Rendering completed" << '\n';
         }

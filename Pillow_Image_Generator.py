@@ -8,4 +8,3 @@ def generate_image(color_array, output_file):
     image.save(output_file)
 
     print("PIL: image created")
-

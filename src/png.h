@@ -4,8 +4,10 @@
 
 #include <pybind11/embed.h>
 
+#include "color.h"
+
 void create_png(
-    const std::vector<std::vector<std::tuple<int, int, int>>>& color_matrix,
+    const color3matrix& color_matrix,
     std::string output_file
 ) {
     // init python interpreter
@@ -19,7 +21,11 @@ void create_png(
             pybind11::list py_row;
 
             for (const auto& pixel : row) {
-                py_row.append(pybind11::make_tuple(std::get<0>(pixel), std::get<1>(pixel), std::get<2>(pixel)));
+                py_row.append(pybind11::make_tuple(
+                    pixel.x(),
+                    pixel.y(),
+                    pixel.z()
+                ));
             }
 
             py_array.append(py_row);
