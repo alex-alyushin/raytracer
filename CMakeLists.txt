@@ -34,12 +34,12 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wunused-variable) # Variable is defined but unused
 endif()
 
-add_executable( myRayTracer ${EXTERNAL} ${SOURCE_RAY_TRACER} )
+add_executable( rt ${EXTERNAL} ${SOURCE_RAY_TRACER} )
 
 find_package( Python3 COMPONENTS Interpreter Development NumPy REQUIRED )
 find_package( pybind11 REQUIRED )
 
-target_link_libraries(myRayTracer PRIVATE pybind11::embed)
+target_link_libraries(rt PRIVATE pybind11::embed)
 
 message(STATUS "Python3 include directories: ${Python3_INCLUDE_DIRS}")
 message(STATUS "Python3 libraries: ${Python3_LIBRARIES}")

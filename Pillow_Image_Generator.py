@@ -1,7 +1,7 @@
 from PIL import Image
 import numpy as np
 
-def generate_image(color_array, output_file):
+def pil_generate_image(color_array, output_file):
     np_array = np.array(color_array, dtype=np.uint8)
 
     image = Image.fromarray(np_array, 'RGB')

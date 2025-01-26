@@ -13,9 +13,14 @@
 #include "sphere.h"
 #include "camera.h"
 
-int main() {
-    std::cout << "[RayTracer v1.0.2]" << std::endl;
+int main(int argc, char* argv[]) {
+    for (int index = 0; index < argc; ++index) {
+        std::cout << "Argument " << index << ": " << argv[index] << std::endl;
+    }
 
+    std::cout << "[RayTracer v1.0.3] running..." << std::endl;
+
+    // Just for PNG generator testing, see import stb.h
     create_png(StabImage(), StabOutput());
 
     return 0;
