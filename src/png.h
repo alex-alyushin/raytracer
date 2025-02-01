@@ -17,7 +17,15 @@ void create_png(const color3matrix& color_matrix, std::string output_file) {
     pybind11::scoped_interpreter guard{};
 
     try {
-        pybind11::module_ image_module = pybind11::module_::import("Pillow_Image_Generator");
+        pybind11::module_ image_module = pybind11::module_::import("pillow_image_generator");
+
+        if (!image_module) {
+            throw std::runtime_error("can\'t import module pillow_image_generator");
+        } else {
+            std::string module_name = image_module.attr("__name__").cast<std::string>();
+            std::cout << "module loaded: " << module_name << std::endl;
+        }
+
         pybind11::list matrix;
 
         for (const auto& row : color_matrix) {
@@ -34,7 +42,7 @@ void create_png(const color3matrix& color_matrix, std::string output_file) {
             matrix.append(line);
         }
 
-        image_module.attr("pil_generate_image")(matrix, output_file);
+        image_module.attr("pillow_generate_image")(matrix, output_file);
     } catch (const pybind11::error_already_set& e) {
         std::cerr << "Python Error: " << e.what() << std::endl;
     }

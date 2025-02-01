@@ -8,11 +8,19 @@ class sphere : public hittable {
     public:
         sphere(const point3& center, double radius) : center(center), radius(radius) {}
 
-        bool hit(/* const ray& r, double ray_tmin, double ray_tmax, hit_record& rec */) const override {
-            // todo: calculate discriminant of intersection with ray
-            throw std::runtime_error("Unimplemented method");
+        // todo: distance to hit point
+        bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
+            auto origin = r.origin();
+            auto direction = r.direction();
 
-            return true;
+            auto w = center - origin;
+            auto h = cross(w, unit_vector(direction)).length();
+
+            if (h <= radius) {
+                return true;
+            }
+
+            return false;
         }
 
     private:

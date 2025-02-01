@@ -97,9 +97,11 @@ inline double dot(const vec3& v, const vec3& u) {
 }
 
 inline vec3 cross(const vec3& v, const vec3& u) {
-    throw std::runtime_error("Unimplemented method");
-
-    return vec3();
+    return vec3(
+        v.y() * u.z() - v.z() * u.y(),
+        v.z() * u.x() - v.x() * u.z(),
+        v.x() * u.y() - v.y() * u.x()
+    );
 }
 
 #endif

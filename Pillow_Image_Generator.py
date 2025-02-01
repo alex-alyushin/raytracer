@@ -1,10 +1,7 @@
 from PIL import Image
 import numpy as np
 
-def pil_generate_image(color_array, output_file):
-    np_array = np.array(color_array, dtype=np.uint8)
-
-    image = Image.fromarray(np_array, 'RGB')
+def pillow_generate_image(color_array, output_file):
+    image = Image.fromarray(np.array(color_array, dtype=np.uint8), 'RGB')
     image.save(output_file)
-
-    print("PIL: image created")
+    print("pillow: image created")

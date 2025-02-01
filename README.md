@@ -64,3 +64,9 @@ Upcoming plan:
 - [ ] Find `OBJ` and `MTL` file in The Internet for demo
 - [ ] Implement `class parser` with `std::ifstream&` interface for OBJ and MTL
 - [x] Pass arguments to the executable binary file `argc argv`
+
+##### January 31, 2025
+
+Upcoming plan:
+
+- [ ] what to do?

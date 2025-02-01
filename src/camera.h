@@ -16,6 +16,7 @@ class camera {
 
         double  vfov                = 90;
 
+        // These are default values, the real values will be taken from the OBJ-file
         point3  lookfrom            = point3(0, 0, 0);      // Point camera is looking from
         point3  lookat              = point3(0, 0, -1);     // Point camera is looking at
         vec3    vup                 = vec3(0, 1, 0);        // Camera "up" direction
@@ -23,19 +24,41 @@ class camera {
         double  defocus_angle       = 0;
         double  focus_dist          = 10;
 
-        void render(const hittable& /* world */scene) {
+        color3matrix render(const hittable& scene) {
+            std::cout << "[render]" << std::endl;
+
             initialize();
 
-            for (int j = 0; j < image_height; j +=1) {
-                for (int i = 0; i < image_width; i += 1) {
-                    // Calculate color for Ray
-                    throw std::runtime_error("Unimplemented method");
+            int counter_all = 0;
+            int counter_hit = 0;
+            color3matrix matrix;
 
-                    // auto r = get_ray(i, j);
-                    // color3 pixel_color(0, 0, 0);
-                    // for (int sample = 0; sample < samples_per_pixel; sample++) {}
+            for (int j = 0; j < image_height; j += 1) {
+                std::vector<color3> row;
+
+                for (int i = 0; i < image_width; i += 1) {
+                    counter_all += 1;
+                    hit_record rec;
+
+                    if (scene.hit(getRay(i, j), interval(0.0, 100.0), rec)) {
+                        row.push_back(color3(0, 0, 0));
+                        counter_hit += 1;
+                    } else {
+                        row.push_back(color3(255, 255, 255));
+                    }
                 }
+
+                matrix.push_back(row);
             }
+
+            std::cout << std::endl;
+
+            auto hitrate = 100 * double(counter_hit) / counter_all;
+            std::cout << "hitrate = " << hitrate << "%" << std::endl;
+            std::cout << "counter all = " << counter_all << std::endl;
+            std::cout << "counter hit = " << counter_hit << std::endl;
+
+            return matrix;
         }
 
     private:
@@ -81,9 +104,13 @@ class camera {
             defocus_disk_v = v * defocus_radius;
         }
 
-        ray get_ray(int i, int j) {
-            throw std::runtime_error("Unimplemented method");
-            return ray();
+        ray getRay(int i, int j) {
+            vec3 direction = pixel00_loc
+                + i * pixel_delta_u
+                + j * pixel_delta_v
+                - center;
+
+            return ray(center, direction);
         }
 };
 
