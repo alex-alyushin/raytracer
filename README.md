@@ -53,10 +53,10 @@ $ ./build/rt arg1 arg2 arg3
 - [x] Implement primitives: vec3, ray, sphere
 - [x] Implement camera positioning
 - [x] Implement calculation of objects intersections
-- [x] [ debug ] simple
-- [x] [ debug ] in-depth
-- [ ] [ debug ] normal
-- [ ] [ debug ] release
+- [x] [ debug ] simple mode
+- [x] [ debug ] in-depth mode
+- [x] [ debug ] normales mode
+- [ ] [ debug ] release mode
 
 ##### January 25, 2025
 
@@ -73,12 +73,20 @@ $ ./build/rt arg1 arg2 arg3
 
 ##### January 31, 2025
 
-- [ ] In a far future: realtime rendering
 - [x] In-Depth rendering
 - [ ] Implement triangles
 
 ##### February 1, 2025
 
-- [x] Add code to: `sphere::hit()`, `hittable_vector::hit()`, `camera::render()`
-- [x] Calculate dist to intersection
-- [x] Color `= 255 * exp(-dist)`
+- [x] Calculate distance to intersection
+- [x] Color in-depth `= 255 * exp(-dist)`
+- [x] Color normales `= 255 * (rec.normal.x() + 1) / 2,`
+
+##### February 2, 2025
+
+- [ ] Reflection
+- [ ] Refraction
+- [ ] Metal *.mtl
+- [ ] Filestream parse
+- [ ] Run with GDB
+- [ ] Log time benchmarks

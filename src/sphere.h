@@ -8,15 +8,24 @@ class sphere : public hittable {
     public:
         sphere(const point3& center, double radius) : center(center), radius(radius) {}
 
-        bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
+        bool hit(const ray& r, interval& rng, hit_record& rec) const override {
             auto origin = r.origin();
             auto direction = r.direction();
-
-            auto w = center - origin;
-            auto h = cross(w, unit_vector(direction)).length();
+            auto h = cross(center - origin, unit_vector(direction)).length();
 
             if (h <= radius) {
-                rec.t = std::sqrt(w.length_squared() - h * h) - std::sqrt(radius * radius - h * h);
+                rec.t = std::sqrt((center - origin).length_squared() - h * h)
+                      - std::sqrt(radius * radius - h * h);
+                rec.point = r.at(rec.t);
+                rec.normal = unit_vector(rec.point - center);
+
+                if (rng.min < 0 || rec.t < rng.min) {
+                    rng.min = rec.t;
+                }
+
+                if (rng.max < 0 || rec.t > rng.max) {
+                    rng.max = rec.t;
+                }
 
                 return true;
             }

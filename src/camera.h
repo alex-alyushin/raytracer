@@ -10,6 +10,9 @@
 
 #include "utils.h"
 
+const auto BLACK = color3(0, 0, 0);
+const auto WHITE = color3(255, 255, 255);
+
 class camera {
     public:
         double  aspect_ratio        = 1.0;
@@ -19,7 +22,6 @@ class camera {
 
         double  vfov                = 90;
 
-        // These are default values, the real values will be taken from the OBJ-file
         point3  lookfrom            = point3(0, 0, 0);      // Point camera is looking from
         point3  lookat              = point3(0, 0, -1);     // Point camera is looking at
         vec3    vup                 = vec3(0, 1, 0);        // Camera "up" direction
@@ -27,7 +29,7 @@ class camera {
         double  defocus_angle       = 0;
         double  focus_dist          = 10;
 
-        color3matrix render(std::shared_ptr<hittable> scene) {
+        color3matrix render(std::shared_ptr<hittable> scene, const std::string& mode) {
             std::cout << "[render]" << std::endl;
 
             initialize();
@@ -37,30 +39,31 @@ class camera {
             int counter_all = 0;
             int counter_hit = 0;
 
+            hit_record rec;
+            interval rng(-1.0, -1.0);
+
             for (int j = 0; j < image_height; j += 1) {
                 std::vector<color3> row;
 
                 for (int i = 0; i < image_width; i += 1) {
-                    counter_all += 1;
-                    hit_record rec;
+                    if (scene->hit(getRay(i, j), rng, rec)) {
+                        row.push_back(getColor(rec, rng, mode));
 
-                    if (scene->hit(getRay(i, j), interval(0.0, 100.0), rec)) {
                         counter_hit += 1;
-
-                        auto channel = 255 * 10 * std::exp(-rec.t);
-                        row.push_back(color3(channel, channel, channel));
                     } else {
-                        row.push_back(color3(255, 255, 255));
+                        row.push_back(WHITE);
                     }
+
+                    counter_all += 1;
                 }
 
                 matrix.push_back(row);
             }
 
             auto hitrate = 100 * double(counter_hit) / counter_all;
-            std::cout << "hitrate = " << hitrate << "%" << std::endl;
-            std::cout << "counter all = " << counter_all << std::endl;
-            std::cout << "counter hit = " << counter_hit << std::endl;
+            std::cout << "Hit Rate = " << hitrate << "%" << std::endl;
+            std::cout << "Counter all = " << counter_all << std::endl;
+            std::cout << "Counter hit = " << counter_hit << std::endl;
 
             return matrix;
         }
@@ -109,12 +112,38 @@ class camera {
         }
 
         ray getRay(int i, int j) {
-            vec3 direction = pixel00_loc
-                + i * pixel_delta_u
-                + j * pixel_delta_v
-                - center;
+            vec3 direction = (
+                pixel00_loc
+                    + i * pixel_delta_u
+                    + j * pixel_delta_v
+                    - center
+            );
 
             return ray(center, direction);
+        }
+
+        color3 getColor(const hit_record& rec, interval& rng, const std::string& mode) {
+            if (mode == "simple") {
+                return BLACK;
+            }
+
+            if (mode == "in-depth") {
+                const double min = 3.0;
+                const double max = 9.9;
+                auto channel = 255 * (max - rec.t) / (max - min);
+
+                return color3(channel, channel, channel);
+            }
+
+            if (mode == "normales") {
+                return color3(
+                    255 * (rec.normal.x() + 1) / 2,
+                    255 * (rec.normal.y() + 1) / 2,
+                    255 * (rec.normal.z() + 1) / 2
+                );
+            }
+
+            return WHITE;
         }
 };
 

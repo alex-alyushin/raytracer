@@ -33,25 +33,28 @@ int main(int argc, char* argv[]) {
     if (mode == "stab") {
         std::cout << "[mode] stab" << std::endl;
         auto matrix = StabImage();
-        create_png(matrix, "src/renders/[0]stab.png");
+        create_png(matrix, "src/renders/[0]-stab.png");
     }
 
     if (mode == "simple") {
         std::cout << "[mode] simple" << std::endl;
         auto scene = getScene1();
-        auto matrix = renderScene1(scene);
-        create_png(matrix, "src/renders/[1]simple.png");
+        auto matrix = renderScene1(scene, mode);
+        create_png(matrix, "src/renders/[1]-simple.png");
     }
 
     if (mode == "in-depth") {
         std::cout << "[mode] in-depth" << std::endl;
         auto scene = getScene1();
-        auto matrix = renderScene1(scene);
-        create_png(matrix, "src/renders/[2]in-depth.png");
+        auto matrix = renderScene1(scene, mode);
+        create_png(matrix, "src/renders/[2]-in-depth.png");
     }
 
     if (mode == "normales") {
-        std::cout << "[normales] normales" << std::endl;
+        std::cout << "[mode] normales" << std::endl;
+        auto scene = getScene1();
+        auto matrix = renderScene1(scene, mode);
+        create_png(matrix, "src/renders/[3]-normales.png");
     }
 
     return 0;

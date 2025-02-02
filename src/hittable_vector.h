@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include <optional>
 
 #include "hittable.h"
 
@@ -24,14 +25,23 @@ class hittable_vector : public hittable {
             objects.clear();
         }
 
-        bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
+        bool hit(const ray& r, interval& rng, hit_record& rec) const override {
             bool hit_anything = false;
 
+            hit_record closest_rec;
+            closest_rec.t = -1;
+
             for (const auto& object : objects) {
-                if (object->hit(r, interval(0.0, 100.0), rec)) {
+                if (object->hit(r, rng, rec)) {
                     hit_anything = true;
+
+                    if (closest_rec.t < 0 || closest_rec.t > rec.t) {
+                        closest_rec = rec;
+                    }
                 }
             }
+
+            rec = closest_rec;
 
             return hit_anything;
         }
