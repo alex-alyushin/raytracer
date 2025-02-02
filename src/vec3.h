@@ -52,7 +52,6 @@ class vec3 {
         }
 };
 
-// alias
 using point3 = vec3;
 
 inline std::ostream& operator<<(std::ostream& out, const vec3& v) {
@@ -75,7 +74,6 @@ inline vec3 operator*(double t, const vec3& v) {
     return vec3(t * v.x(), t * v.y(), t * v.z());
 }
 
-// alias
 inline vec3 operator*(const vec3& v, double t) {
     return t * v;
 }

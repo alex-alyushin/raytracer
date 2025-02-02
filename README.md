@@ -4,7 +4,17 @@ This is a simple realization of a [ray tracing algorithm](https://en.wikipedia.o
 
 ### Install, Build and Run
 
-The entire project is written in C++. Also there is Python for generating output PNG files. Ensure that Python3 and the required libraries are installed.
+The entire project is written in C++. Also there is Python for generating output PNG files. Check Python3 and pip3 versions.
+
+```bash
+$ python3 --version
+Python 3.x.x
+
+$ pip3 --version
+pip 24.x.x ...
+```
+
+Ensure that dependencies are installed
 
 ```bash
 $ pip3 show pillow
@@ -42,24 +52,20 @@ $ ./build/rt arg1 arg2 arg3
 - [x] Use Pillow to create a color gradient in a for loop
 - [x] Implement primitives: vec3, ray, sphere
 - [x] Implement camera positioning
-- [ ] Implement calculation of objects intersections
-- [ ] [ debug ] simple
-- [ ] [ debug ] depth
+- [x] Implement calculation of objects intersections
+- [x] [ debug ] simple
+- [x] [ debug ] in-depth
 - [ ] [ debug ] normal
 - [ ] [ debug ] release
 
 ##### January 25, 2025
 
-Upcoming plan for the ray tracer:
-
 - [x] Camera: initialize all parameters
-- [ ] Implement ray-sphere intersection
-- [ ] Build mapping of a point in the scene to the viewport
+- [x] Implement ray-sphere intersection
+- [x] Build mapping of a point in the scene to the viewport
 - [x] Define alias `color3 = vec3` and create utilities for writing color to a matrix
 
 ##### January 26, 2025
-
-Upcoming plan:
 
 - [ ] Find `OBJ` and `MTL` file in The Internet for demo
 - [ ] Implement `class parser` with `std::ifstream&` interface for OBJ and MTL
@@ -67,6 +73,12 @@ Upcoming plan:
 
 ##### January 31, 2025
 
-Upcoming plan:
+- [ ] In a far future: realtime rendering
+- [x] In-Depth rendering
+- [ ] Implement triangles
 
-- [ ] what to do?
+##### February 1, 2025
+
+- [x] Add code to: `sphere::hit()`, `hittable_vector::hit()`, `camera::render()`
+- [x] Calculate dist to intersection
+- [x] Color `= 255 * exp(-dist)`

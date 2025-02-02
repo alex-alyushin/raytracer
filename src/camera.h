@@ -1,6 +1,9 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include <iostream>
+#include <cmath>
+
 #include "hittable.h"
 #include "material.h"
 #include "ray.h"
@@ -24,14 +27,15 @@ class camera {
         double  defocus_angle       = 0;
         double  focus_dist          = 10;
 
-        color3matrix render(const hittable& scene) {
+        color3matrix render(std::shared_ptr<hittable> scene) {
             std::cout << "[render]" << std::endl;
 
             initialize();
 
+            color3matrix matrix;
+
             int counter_all = 0;
             int counter_hit = 0;
-            color3matrix matrix;
 
             for (int j = 0; j < image_height; j += 1) {
                 std::vector<color3> row;
@@ -40,9 +44,11 @@ class camera {
                     counter_all += 1;
                     hit_record rec;
 
-                    if (scene.hit(getRay(i, j), interval(0.0, 100.0), rec)) {
-                        row.push_back(color3(0, 0, 0));
+                    if (scene->hit(getRay(i, j), interval(0.0, 100.0), rec)) {
                         counter_hit += 1;
+
+                        auto channel = 255 * 10 * std::exp(-rec.t);
+                        row.push_back(color3(channel, channel, channel));
                     } else {
                         row.push_back(color3(255, 255, 255));
                     }
@@ -50,8 +56,6 @@ class camera {
 
                 matrix.push_back(row);
             }
-
-            std::cout << std::endl;
 
             auto hitrate = 100 * double(counter_hit) / counter_all;
             std::cout << "hitrate = " << hitrate << "%" << std::endl;

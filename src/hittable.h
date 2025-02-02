@@ -3,8 +3,6 @@
 
 #include "hit_record.h"
 
-// class material;
-
 class hittable {
     public:
         virtual ~hittable() = default;

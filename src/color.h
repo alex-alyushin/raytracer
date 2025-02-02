@@ -6,10 +6,9 @@
 #include "interval.h"
 #include "vec3.h"
 
-// Alias: RGB
-using color3 = vec3;
+// Aliases
 
-// Alias: color matrix
+using color3 = vec3;
 using color3matrix = std::vector<std::vector<color3>>;
 
 // Utils

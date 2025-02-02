@@ -1,11 +1,4 @@
-#ifndef STB_H
-#define STB_H
-
 #include "color.h"
-
-std::string StabOutput() {
-    return "stab_image.png";
-}
 
 color3matrix StabImage() {
     color3matrix color_matrix;
@@ -31,5 +24,3 @@ color3matrix StabImage() {
 
     return color_matrix;
 }
-
-#endif

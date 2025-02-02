@@ -13,7 +13,6 @@
 //==============================================================================================
 
 void create_png(const color3matrix& color_matrix, std::string output_file) {
-    // init interpreter
     pybind11::scoped_interpreter guard{};
 
     try {
@@ -45,5 +44,7 @@ void create_png(const color3matrix& color_matrix, std::string output_file) {
         image_module.attr("pillow_generate_image")(matrix, output_file);
     } catch (const pybind11::error_already_set& e) {
         std::cerr << "Python Error: " << e.what() << std::endl;
+    } catch (...) {
+        std::cerr << "Python Error: something went wrong" << std::endl;
     }
 }
