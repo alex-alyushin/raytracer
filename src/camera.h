@@ -48,7 +48,6 @@ class camera {
                 for (int i = 0; i < image_width; i += 1) {
                     if (scene->hit(getRay(i, j), rng, rec)) {
                         row.push_back(getColor(rec, rng, mode));
-
                         counter_hit += 1;
                     } else {
                         row.push_back(WHITE);

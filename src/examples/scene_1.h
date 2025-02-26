@@ -1,11 +1,14 @@
 const std::shared_ptr<hittable> getScene1() {
     auto scene = std::make_shared<hittable_vector>();
+    auto lambert = std::make_shared<lambertian>(
+        color3(0.4, 0.2, 0.1) // albedo
+    );
 
-    scene->add(std::make_shared<sphere>(point3(-4, 1, 0), 1.0));
-    scene->add(std::make_shared<sphere>(point3(-2, 1, 0), 1.0));
-    scene->add(std::make_shared<sphere>(point3(+0, 1, 0), 1.0));
-    scene->add(std::make_shared<sphere>(point3(+2, 1, 0), 1.0));
-    scene->add(std::make_shared<sphere>(point3(+4, 1, 0), 1.0));
+    scene->add(std::make_shared<sphere>(point3(-4, 1, 0), 1.0, lambert));
+    scene->add(std::make_shared<sphere>(point3(-2, 1, 0), 1.0, lambert));
+    scene->add(std::make_shared<sphere>(point3(+0, 1, 0), 1.0, lambert));
+    scene->add(std::make_shared<sphere>(point3(+2, 1, 0), 1.0, lambert));
+    scene->add(std::make_shared<sphere>(point3(+4, 1, 0), 1.0, lambert));
 
     return scene;
 }

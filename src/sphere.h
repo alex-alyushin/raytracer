@@ -6,7 +6,10 @@
 
 class sphere : public hittable {
     public:
-        sphere(const point3& center, double radius) : center(center), radius(radius) {}
+        sphere(const point3& center, double radius, std::shared_ptr<material> mat)
+            : center(center)
+            , radius(radius)
+            , mat(mat) {}
 
         bool hit(const ray& r, interval& rng, hit_record& rec) const override {
             auto origin = r.origin();
@@ -18,6 +21,7 @@ class sphere : public hittable {
                       - std::sqrt(radius * radius - h * h);
                 rec.point = r.at(rec.t);
                 rec.normal = unit_vector(rec.point - center);
+                rec.mat = mat;
 
                 if (rng.min < 0 || rec.t < rng.min) {
                     rng.min = rec.t;
@@ -36,6 +40,7 @@ class sphere : public hittable {
     private:
         point3 center;
         double radius;
+        std::shared_ptr<material> mat;
 };
 
 #endif

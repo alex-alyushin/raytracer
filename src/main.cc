@@ -6,6 +6,7 @@
 #include "ray.h"
 #include "vec3.h"
 #include "color.h"
+#include "hit_record.h"
 #include "material.h"
 #include "hittable.h"
 #include "hittable_vector.h"
