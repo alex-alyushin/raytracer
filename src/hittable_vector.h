@@ -25,14 +25,14 @@ class hittable_vector : public hittable {
             objects.clear();
         }
 
-        bool hit(const ray& r, interval& rng, hit_record& rec) const override {
+        bool hit(const ray& r, hit_record& rec) const override {
             bool hit_anything = false;
 
             hit_record closest_rec;
             closest_rec.t = -1;
 
             for (const auto& object : objects) {
-                if (object->hit(r, rng, rec)) {
+                if (object->hit(r, rec)) {
                     hit_anything = true;
 
                     if (closest_rec.t < 0 || closest_rec.t > rec.t) {

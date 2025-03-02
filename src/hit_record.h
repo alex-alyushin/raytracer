@@ -9,16 +9,6 @@ class hit_record {
         vec3 normal;
         double t;
         std::shared_ptr<material> mat;
-
-        hit_record& operator=(const hit_record& other) {
-            if (this != &other) {
-                this->point = other.point;
-                this->normal = other.normal;
-                this->t = other.t;
-            }
-
-            return *this;
-        }
 };
 
 #endif

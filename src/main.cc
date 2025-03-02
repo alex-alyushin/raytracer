@@ -1,6 +1,6 @@
-#include <iostream>
-#include <string>
 #include <vector>
+#include <string>
+#include <iostream>
 
 #include "png.h"
 #include "ray.h"
@@ -17,7 +17,7 @@
 #include "examples/scene_1.h"
 
 int main(int argc, char* argv[]) {
-    std::cout << "[RayTracer v1.2.0] running..." << std::endl;
+    std::cout << "[RayTracer v1.3.0] running..." << std::endl;
 
     std::string mode;
 
@@ -31,32 +31,11 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    if (mode == "stab") {
-        std::cout << "[mode] stab" << std::endl;
-        auto matrix = StabImage();
-        create_png(matrix, "src/renders/[0]-stab.png");
-    }
+    auto scene = getScene();
+    auto matrix = renderScene(scene);
+    auto output = "src/artefacts/scene.png";
 
-    if (mode == "simple") {
-        std::cout << "[mode] simple" << std::endl;
-        auto scene = getScene1();
-        auto matrix = renderScene1(scene, mode);
-        create_png(matrix, "src/renders/[1]-simple.png");
-    }
-
-    if (mode == "in-depth") {
-        std::cout << "[mode] in-depth" << std::endl;
-        auto scene = getScene1();
-        auto matrix = renderScene1(scene, mode);
-        create_png(matrix, "src/renders/[2]-in-depth.png");
-    }
-
-    if (mode == "normales") {
-        std::cout << "[mode] normales" << std::endl;
-        auto scene = getScene1();
-        auto matrix = renderScene1(scene, mode);
-        create_png(matrix, "src/renders/[3]-normales.png");
-    }
+    create_png(matrix, output);
 
     return 0;
 }

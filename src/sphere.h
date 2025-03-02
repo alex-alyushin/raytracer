@@ -11,7 +11,7 @@ class sphere : public hittable {
             , radius(radius)
             , mat(mat) {}
 
-        bool hit(const ray& r, interval& rng, hit_record& rec) const override {
+        bool hit(const ray& r, hit_record& rec) const override {
             auto origin = r.origin();
             auto direction = r.direction();
             auto h = cross(center - origin, unit_vector(direction)).length();
@@ -22,14 +22,6 @@ class sphere : public hittable {
                 rec.point = r.at(rec.t);
                 rec.normal = unit_vector(rec.point - center);
                 rec.mat = mat;
-
-                if (rng.min < 0 || rec.t < rng.min) {
-                    rng.min = rec.t;
-                }
-
-                if (rng.max < 0 || rec.t > rng.max) {
-                    rng.max = rec.t;
-                }
 
                 return true;
             }

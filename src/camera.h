@@ -2,6 +2,9 @@
 #define CAMERA_H
 
 #include <iostream>
+#include <iomanip>
+#include <chrono>
+#include <ctime>
 #include <cmath>
 
 #include "hittable.h"
@@ -29,40 +32,51 @@ class camera {
         double  defocus_angle       = 0;
         double  focus_dist          = 10;
 
-        color3matrix render(std::shared_ptr<hittable> scene, const std::string& mode) {
-            std::cout << "[render]" << std::endl;
-
+        color3matrix render(std::shared_ptr<hittable> scene) {
             initialize();
 
             color3matrix matrix;
 
-            int counter_all = 0;
-            int counter_hit = 0;
+            int pixel_counter = 0;
+            int rate1 = rate(pixel_counter, image_height, image_width);
+            const auto start = std::chrono::high_resolution_clock::now();
 
-            hit_record rec;
-            interval rng(-1.0, -1.0);
-
+            /* Main Render Cicle */
             for (int j = 0; j < image_height; j += 1) {
                 std::vector<color3> row;
 
                 for (int i = 0; i < image_width; i += 1) {
-                    if (scene->hit(getRay(i, j), rng, rec)) {
-                        row.push_back(getColor(rec, rng, mode));
-                        counter_hit += 1;
-                    } else {
-                        row.push_back(WHITE);
+                    color3 pixel = BLACK;
+
+                    for (int s = 0; s < samples_per_pixel; s += 1) {
+                        auto r = getRay(i, j);
+                        pixel += getColor(r, scene);
                     }
 
-                    counter_all += 1;
+                    pixel_counter += 1;
+                    int rate2 = rate(pixel_counter, image_height, image_width);
+                    if (rate2 != rate1) {
+                        std::cout
+                            << "\rPixels rendered = "
+                            << rate2 << "%"
+                            << "\tTime = "
+                            << banchmark(start)
+                            << std::flush;
+
+                        rate1 = rate2;
+                    }
+
+                    row.push_back(pixel_samples_scale * pixel);
                 }
 
                 matrix.push_back(row);
             }
 
-            auto hitrate = 100 * double(counter_hit) / counter_all;
-            std::cout << "Hit Rate = " << hitrate << "%" << std::endl;
-            std::cout << "Counter all = " << counter_all << std::endl;
-            std::cout << "Counter hit = " << counter_hit << std::endl;
+            std::cout
+                << std::endl
+                << "Render completed in "
+                << banchmark(start)
+                << std::endl;
 
             return matrix;
         }
@@ -110,36 +124,33 @@ class camera {
             defocus_disk_v = v * defocus_radius;
         }
 
-        ray getRay(int i, int j) {
-            vec3 direction = (
-                pixel00_loc
-                    + i * pixel_delta_u
-                    + j * pixel_delta_v
-                    - center
+        vec3 sample_square() {
+            return vec3(
+                random_double() - 0.5,
+                random_double() - 0.5,
+                0
             );
+        }
+
+        ray getRay(int i, int j) {
+            vec3 randon_offset = sample_square();
+            vec3 direction = pixel00_loc
+                + (i + randon_offset.x()) * pixel_delta_u
+                + (j + randon_offset.y()) * pixel_delta_v
+                - center;
 
             return ray(center, direction);
         }
 
-        color3 getColor(const hit_record& rec, interval& rng, const std::string& mode) {
-            if (mode == "simple") {
-                return BLACK;
-            }
+        color3 getColor(const ray& ray, std::shared_ptr<hittable> scene) {
+            hit_record rec;
 
-            if (mode == "in-depth") {
+            if (scene->hit(ray, rec)) {
                 const double min = 3.0;
                 const double max = 9.9;
                 auto channel = 255 * (max - rec.t) / (max - min);
 
                 return color3(channel, channel, channel);
-            }
-
-            if (mode == "normales") {
-                return color3(
-                    255 * (rec.normal.x() + 1) / 2,
-                    255 * (rec.normal.y() + 1) / 2,
-                    255 * (rec.normal.z() + 1) / 2
-                );
             }
 
             return WHITE;
