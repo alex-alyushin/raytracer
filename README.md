@@ -46,14 +46,6 @@ $ ./build/rt arg1 arg2 arg3
 
 ### Working Plan
 
-- [x] Build and run boilerplate
-- [x] Connect Python interpreter
-- [x] Use Pillow to create file output.png
-- [x] Use Pillow to create a color gradient in a for loop
-- [x] Implement primitives: vec3, ray, sphere
-- [x] Implement camera positioning
-- [x] Implement calculation of objects intersections
-- [x] [ debug ] simple mode
-- [x] [ debug ] in-depth mode
-- [x] [ debug ] normales mode
-- [ ] release mode
+- [x] Lambertian: diffuse reflection
+- [ ] Metal: mirror reflection
+- [ ] Dielectrics: refraction

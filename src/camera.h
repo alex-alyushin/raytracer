@@ -13,6 +13,8 @@
 
 #include "utils.h"
 
+using high_resolution_time = std::chrono::time_point<std::chrono::high_resolution_clock>;
+
 const auto BLACK = color3(0, 0, 0);
 const auto WHITE = color3(255, 255, 255);
 
@@ -32,14 +34,17 @@ class camera {
         double  defocus_angle       = 0;
         double  focus_dist          = 10;
 
-        color3matrix render(std::shared_ptr<hittable> scene) {
+        color3matrix render(std::shared_ptr<collection> scene) {
             initialize();
-
             color3matrix matrix;
 
-            int pixel_counter = 0;
-            int rate1 = rate(pixel_counter, image_height, image_width);
+            /* Log Info */
             const auto start = std::chrono::high_resolution_clock::now();
+            int progress_in_pixels = 0;
+            int progress_in_percentage = int(
+                100 * progress_in_pixels
+                / (image_height * image_width)
+            );
 
             /* Main Render Cicle */
             for (int j = 0; j < image_height; j += 1) {
@@ -49,34 +54,18 @@ class camera {
                     color3 pixel = BLACK;
 
                     for (int s = 0; s < samples_per_pixel; s += 1) {
-                        auto r = getRay(i, j);
-                        pixel += getColor(r, scene);
+                        auto camera_ray = getRay(i, j);
+                        pixel += getColor(camera_ray, max_depth, scene);
                     }
 
-                    pixel_counter += 1;
-                    int rate2 = rate(pixel_counter, image_height, image_width);
-                    if (rate2 != rate1) {
-                        std::cout
-                            << "\rPixels rendered = "
-                            << rate2 << "%"
-                            << "\tTime = "
-                            << banchmark(start)
-                            << std::flush;
-
-                        rate1 = rate2;
-                    }
-
-                    row.push_back(pixel_samples_scale * pixel);
+                    row.push_back(write_pixel(pixel_samples_scale * pixel));
+                    progress(start, progress_in_pixels, progress_in_percentage);
                 }
 
                 matrix.push_back(row);
             }
 
-            std::cout
-                << std::endl
-                << "Render completed in "
-                << banchmark(start)
-                << std::endl;
+            completed(start);
 
             return matrix;
         }
@@ -91,6 +80,9 @@ class camera {
         vec3    u, v, w;
         vec3    defocus_disk_u;
         vec3    defocus_disk_v;
+
+        // [depth, freq]
+        std::unordered_map<int, int> calls_cache;
 
         void initialize() {
             image_height = int(image_width / aspect_ratio);
@@ -124,6 +116,55 @@ class camera {
             defocus_disk_v = v * defocus_radius;
         }
 
+        void progress(const high_resolution_time& start, int& progress_in_pixels, int& progress_in_percentage) {
+            int progress_new = int(
+                100 * (progress_in_pixels += 1)
+                / (image_height * image_width)
+            );
+
+            if (progress_new != progress_in_percentage) {
+                std::cout
+                    << "\rPixels rendered = "
+                    << progress_new << "%"
+                    << "\tTime = "
+                    << benchmark(start)
+                    << std::flush;
+
+                progress_in_percentage = progress_new;
+            }
+        }
+
+        void completed(const high_resolution_time& start) {
+            std::cout
+                << std::endl
+                << "[C++] Render completed in "
+                << benchmark(start)
+                << std::endl;
+
+            for (auto& p : calls_cache) {
+                std::cout << "d = " << p.first << "\tcount = " << p.second << std::endl;
+            }
+        }
+
+        std::string benchmark(const high_resolution_time& start) {
+            const auto end = std::chrono::high_resolution_clock::now();
+            const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+            auto minutes = std::chrono::duration_cast<std::chrono::minutes>(duration % std::chrono::hours(1)).count();
+            auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration % std::chrono::minutes(1)).count();
+
+            return std::to_string(minutes) + ":"
+                + (seconds < 10 ? "0" : "") + std::to_string(seconds);
+        };
+
+        void save_to_cache(int depth) {
+            if (calls_cache.find(depth) != calls_cache.end()) {
+                calls_cache[depth] += 1;
+            } else {
+                calls_cache[depth] = 1;
+            }
+        }
+
         vec3 sample_square() {
             return vec3(
                 random_double() - 0.5,
@@ -142,15 +183,25 @@ class camera {
             return ray(center, direction);
         }
 
-        color3 getColor(const ray& ray, std::shared_ptr<hittable> scene) {
+        color3 getColor(const ray& camera_ray, int depth, std::shared_ptr<collection> scene) {
+            save_to_cache(depth);
+
+            if (depth < 0) {
+                return BLACK;
+            }
+
             hit_record rec;
+            interval hit_interval(0.00001, std::numeric_limits<double>::infinity());
 
-            if (scene->hit(ray, rec)) {
-                const double min = 3.0;
-                const double max = 9.9;
-                auto channel = 255 * (max - rec.t) / (max - min);
+            if (scene->hit(camera_ray, hit_interval, rec)) {
+                ray scattered;
+                color3 attenuation;
 
-                return color3(channel, channel, channel);
+                if (rec.mat->scatter(camera_ray, rec, attenuation, scattered)) {
+                    return attenuation * getColor(scattered, depth - 1, scene);
+                }
+
+                return BLACK;
             }
 
             return WHITE;

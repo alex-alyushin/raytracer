@@ -22,7 +22,7 @@ void create_png(const color3matrix& color_matrix, std::string output_file) {
             throw std::runtime_error("can\'t import module pillow_image_generator");
         } else {
             std::string module_name = image_module.attr("__name__").cast<std::string>();
-            std::cout << "module loaded: " << module_name << std::endl;
+            std::cout << "[Python] module loaded: " << module_name << std::endl;
         }
 
         pybind11::list matrix;

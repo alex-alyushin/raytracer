@@ -7,13 +7,13 @@
 
 #include "hittable.h"
 
-class hittable_vector : public hittable {
+class collection : public hittable {
     public:
         std::vector<std::shared_ptr<hittable>> objects;
 
-        hittable_vector() {}
+        collection() {}
 
-        hittable_vector(std::shared_ptr<hittable> object) {
+        collection(std::shared_ptr<hittable> object) {
             add(object);
         }
 
@@ -25,14 +25,14 @@ class hittable_vector : public hittable {
             objects.clear();
         }
 
-        bool hit(const ray& r, hit_record& rec) const override {
+        bool hit(const ray& r, interval& i, hit_record& rec) const override {
             bool hit_anything = false;
 
             hit_record closest_rec;
             closest_rec.t = -1;
 
             for (const auto& object : objects) {
-                if (object->hit(r, rec)) {
+                if (object->hit(r, i, rec)) {
                     hit_anything = true;
 
                     if (closest_rec.t < 0 || closest_rec.t > rec.t) {

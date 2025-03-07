@@ -2,6 +2,7 @@
 #define HIT_RECORD_H
 
 class material;
+class hittable;
 
 class hit_record {
     public:

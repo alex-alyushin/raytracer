@@ -21,7 +21,7 @@ inline double linear_to_gamma(double linear) {
     return 0;
 }
 
-inline std::ostream& write_pixel(std::ostream& out, const color3& color) {
+inline color3 write_pixel(const color3& color) {
     auto R = color.x();
     auto G = color.y();
     auto B = color.z();
@@ -31,14 +31,14 @@ inline std::ostream& write_pixel(std::ostream& out, const color3& color) {
     G = linear_to_gamma(G);
     B = linear_to_gamma(B);
 
-    // Transform from [0, 1] to [0, 255]
+    // In [0, 1]
     static const interval value(0.000, 0.999);
 
     auto rByte = int(256 * value.clamp(R));
     auto gByte = int(256 * value.clamp(G));
     auto bByte = int(256 * value.clamp(B));
 
-    return out << rByte << " " << gByte << " " << bByte;
+    return color3(rByte, gByte, bByte);
 }
 
 #endif

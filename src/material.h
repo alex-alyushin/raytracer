@@ -12,7 +12,8 @@ class material {
 
 class lambertian : public material {
 	public:
-		lambertian(const color3& albedo) : albedo(albedo) {}
+		lambertian(const color3& albedo)
+			: albedo(albedo) {}
 
 		std::string type() override {
 			return "lambertian";
@@ -37,6 +38,21 @@ class metal : public material {
 				: albedo(albedo)
 				, fuzz(std::min(fuzz, 1.0)) {}
 
+		std::string type() override {
+			return "metal";
+		}
+
+		bool scatter(const ray& r_in, const hit_record& rec, color3& attenuation, ray& scattered) const override {
+			auto reflected = unit_vector(mirror_reflect(r_in.direction(), rec.normal));
+				+ fuzz * random_unit_vector();
+
+			scattered = ray(rec.point, reflected);
+			attenuation = albedo;
+
+			return dot(scattered.direction(), rec.normal) > 0;
+		}
+
+
 	private:
 		color3 albedo;
 		double fuzz;
@@ -45,6 +61,10 @@ class metal : public material {
 class dielectric : public material {
 	public:
 		dielectric(double refraction_index) : refraction_index(refraction_index) {}
+
+		std::string type() override {
+			return "dielectric";
+		}
 
 	private:
 		double refraction_index;
