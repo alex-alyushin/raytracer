@@ -52,6 +52,14 @@ class vec3 {
             return std::sqrt(length_squared());
         }
 
+        bool near_zero() {
+            auto delta = 1e-8;
+
+            return (std::fabs(e[0]) < delta)
+                && (std::fabs(e[1]) < delta)
+                && (std::fabs(e[2]) < delta);
+        }
+
         static vec3 random() {
             return vec3(
                 random_double(),

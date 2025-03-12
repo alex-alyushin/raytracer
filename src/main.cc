@@ -13,8 +13,9 @@
 #include "sphere.h"
 #include "camera.h"
 
-#include "examples/stab.h"
 #include "examples/scene_1.h"
+#include "examples/scene_2.h"
+#include "examples/scene_3.h"
 
 std::pair<std::string, std::string> parse_arguments(const std::string& arg) {
     size_t pos = arg.find('=');
@@ -30,7 +31,7 @@ std::pair<std::string, std::string> parse_arguments(const std::string& arg) {
 }
 
 int main(int argc, char* argv[]) {
-    std::cout << "[RayTracer v1.4.0] running..." << std::endl;
+    std::cout << "[RayTracer v1.5.0] running..." << std::endl;
 
     std::string mode;
     std::string output = "out.png";
@@ -49,7 +50,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    auto matrix = renderScene(getScene());
+    auto matrix = renderScene3(getScene3());
     create_png(matrix, "src/artefacts/" + output);
 
     return 0;

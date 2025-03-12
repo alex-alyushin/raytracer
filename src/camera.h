@@ -15,8 +15,8 @@
 
 using high_resolution_time = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
-const auto BLACK = color3(0, 0, 0);
-const auto WHITE = color3(255, 255, 255);
+const auto BLACK = color3(0.0, 0.0, 0.0);
+const auto WHITE = color3(1.0, 1.0, 1.0);
 
 class camera {
     public:
@@ -135,15 +135,16 @@ class camera {
         }
 
         void completed(const high_resolution_time& start) {
-            std::cout
-                << std::endl
-                << "[C++] Render completed in "
-                << benchmark(start)
-                << std::endl;
+            std::cout << "\nDepth stats:" << std::endl;
 
             for (auto& p : calls_cache) {
                 std::cout << "d = " << p.first << "\tcount = " << p.second << std::endl;
             }
+
+            std::cout
+                << "[C++] Render completed in time "
+                << benchmark(start)
+                << std::endl;
         }
 
         std::string benchmark(const high_resolution_time& start) {
@@ -191,7 +192,7 @@ class camera {
             }
 
             hit_record rec;
-            interval hit_interval(0.00001, std::numeric_limits<double>::infinity());
+            interval hit_interval(0.001, std::numeric_limits<double>::infinity());
 
             if (scene->hit(camera_ray, hit_interval, rec)) {
                 ray scattered;

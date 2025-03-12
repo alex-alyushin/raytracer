@@ -22,6 +22,10 @@ class lambertian : public material {
 		bool scatter(const ray& r_in, const hit_record& rec, color3& attenuation, ray& scattered) const override {
 			auto scatter_direction = rec.normal + random_unit_vector();
 
+			if (scatter_direction.near_zero()) {
+				std::cout << "near zero" << std::endl;
+			}
+
 			scattered = ray(rec.point, scatter_direction);
 			attenuation = albedo;
 

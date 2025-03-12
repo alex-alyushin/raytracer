@@ -47,5 +47,5 @@ $ ./build/rt arg1 arg2 arg3
 ### Working Plan
 
 - [x] Lambertian: diffuse reflection
-- [ ] Metal: mirror reflection
+- [x] Metal: mirror reflection
 - [ ] Dielectrics: refraction
