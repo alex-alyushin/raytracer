@@ -4,8 +4,6 @@ This is a simple realization of a [ray tracing algorithm](https://en.wikipedia.o
 
 ![pic-1](src/renders/metal-diffuse-metal-sky.png)
 
-![pic-1](src/renders/snell-refract.png)
-
 ![pic-1](src/renders/metal-2-metal.png)
 
 ### Install, Build and Run
