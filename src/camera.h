@@ -184,6 +184,13 @@ class camera {
             return ray(center, direction);
         }
 
+        color3 getSky(const ray& camera_ray) {
+            auto unit_direction = unit_vector(camera_ray.direction());
+            auto a = 0.5 * (unit_direction.y() + 1.0);
+
+            return (1.0 - a) * color3(1.0, 1.0, 1.0) + a * color3(0.5, 0.7, 1.0);
+        }
+
         color3 getColor(const ray& camera_ray, int depth, std::shared_ptr<collection> scene) {
             save_to_cache(depth);
 
@@ -205,7 +212,7 @@ class camera {
                 return BLACK;
             }
 
-            return WHITE;
+            return getSky(camera_ray);
         }
 };
 

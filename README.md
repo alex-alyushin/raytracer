@@ -2,6 +2,12 @@
 
 This is a simple realization of a [ray tracing algorithm](https://en.wikipedia.org/wiki/Ray_tracing_(graphics)).
 
+![pic-1](src/renders/metal-diffuse-metal-sky.png)
+
+![pic-1](src/renders/snell-refract.png)
+
+![pic-1](src/renders/metal-2-metal.png)
+
 ### Install, Build and Run
 
 The entire project is written in C++. Also there is Python for generating output PNG files. Check Python3 and pip3 versions.
@@ -46,6 +52,13 @@ $ ./build/rt arg1 arg2 arg3
 
 ### Working Plan
 
-- [x] Lambertian: diffuse reflection
-- [x] Metal: mirror reflection
-- [ ] Dielectrics: refraction
+- [x] Diffuse reflection
+- [x] Mirror reflection
+- [x] Snell's refraction
+
+### Todo
+
+- [x] blue sky
+- [ ] defocus blur
+- [ ] multithreading
+- [ ] final image (random objects)

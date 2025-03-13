@@ -176,4 +176,12 @@ inline vec3 mirror_reflect(const vec3& v, const vec3& n) {
     return -2 * dot(v, n) * n + v;
 }
 
+inline vec3 refract_by_snell(const vec3& v, const vec3& n, double etai) {
+    auto cos = std::fmin(dot(-v, n), 1.0);
+    auto ray_out_normal = etai * (v + cos * n);
+    auto ray_out_tangent = -std::sqrt(std::fabs(1.0 - ray_out_normal.length_squared())) * n;
+
+    return ray_out_normal + ray_out_tangent;
+}
+
 #endif
