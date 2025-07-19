@@ -56,7 +56,9 @@ $ ./build/rt arg1 arg2 arg3
 
 ### Todo
 
-- [x] blue sky
-- [ ] defocus blur
-- [ ] multithreading
-- [ ] final image (random objects)
+- [ ] implement defocus blur
+- [ ] implement multithreading
+- [ ] implement triangle mesh
+- [ ] implement *.obj / *.mtl files reader
+- [ ] debug util: print all objects which intersect row path
+
