@@ -37,12 +37,13 @@ endif()
 
 add_executable( rt ${EXTERNAL} ${SOURCE_RAY_TRACER} )
 
-find_package( Python3 COMPONENTS Interpreter Development NumPy REQUIRED )
-find_package( pybind11 REQUIRED )
-
-target_link_libraries(rt PRIVATE pybind11::embed)
-
-message(STATUS "Python3 include directories: ${Python3_INCLUDE_DIRS}")
-message(STATUS "Python3 libraries: ${Python3_LIBRARIES}")
+include(FetchContent)
+FetchContent_Declare(
+    stb
+    GIT_REPOSITORY https://github.com/nothings/stb.git
+    GIT_TAG master
+)
+FetchContent_MakeAvailable(stb)
+target_include_directories(rt PRIVATE ${stb_SOURCE_DIR})
 
 message(STATUS "Build completed!")

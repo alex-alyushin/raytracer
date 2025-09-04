@@ -32,7 +32,7 @@ std::pair<std::string, std::string> parse_arguments(const std::string& arg) {
 }
 
 int main(int argc, char* argv[]) {
-    std::cout << "[RayTracer v1.6.0] running..." << std::endl;
+    std::cout << "[RayTracer v1.7.0] running..." << std::endl;
 
     std::string mode;
     std::string output = "out.png";
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    auto matrix = renderScene4(getScene4());
+    auto matrix = renderScene2(getScene2());
     create_png(matrix, "src/artefacts/" + output);
 
     return 0;

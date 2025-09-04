@@ -6,59 +6,25 @@ This is a simple realization of a [ray tracing algorithm](https://en.wikipedia.o
 
 ![pic-1](src/renders/metal-2-metal.png)
 
-### Install, Build and Run
-
-The entire project is written in C++. Also there is Python for generating output PNG files. Check Python3 and pip3 versions.
-
-```bash
-$ python3 --version
-Python 3.x.x
-
-$ pip3 --version
-pip 24.x.x ...
-```
-
-Ensure that dependencies are installed
-
-```bash
-$ pip3 show pillow
-$ pip3 show pybind11
-$ pip3 show numpy
-```
-
-Install if not
-
-```bash
-$ pip3 install pillow
-$ pip3 install pybind11
-$ pip3 install numpy
-```
-
-##### Build
+##### Build Renderer
 
 ```bash
 $ cmake -B build
-$ cmake --build build --config Debug
-$ cmake --build build --config Release
+$ cmake --build build
 ```
 
 ##### Run Renderer
 
 ```bash
-$ ./build/rt arg1 arg2 arg3
+$ ./build/rt
 ```
-
-### Working Plan
-
-- [x] Diffuse reflection
-- [x] Mirror reflection
-- [x] Snell's refraction
 
 ### Todo
 
 - [ ] implement defocus blur
 - [ ] implement multithreading
 - [ ] implement triangle mesh
-- [ ] implement *.obj / *.mtl files reader
+- [ ] implement obj/mtl file reader
+- [ ] implement texturing
 - [ ] debug util: print all objects which intersect row path
 
