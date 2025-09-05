@@ -12,7 +12,7 @@ const std::shared_ptr<collection> getScene3() {
     return scene;
 }
 
-color3matrix renderScene3(std::shared_ptr<collection> scene) {
+color3matrix renderScene3(std::shared_ptr<collection> scene, std::string mode) {
     camera cam;
 
     cam.aspect_ratio        = 16.0 / 9.0;
@@ -25,5 +25,5 @@ color3matrix renderScene3(std::shared_ptr<collection> scene) {
     cam.lookat              = point3(0, 0, 0);
     cam.vup                 = vec3(0, 1, 0);
 
-    return cam.render(scene);
+    return cam.render(scene, mode);
 }

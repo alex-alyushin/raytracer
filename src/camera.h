@@ -3,17 +3,14 @@
 
 #include <iostream>
 #include <iomanip>
-#include <chrono>
 #include <ctime>
 #include <cmath>
 
 #include "hittable.h"
 #include "material.h"
 #include "ray.h"
-
+#include "logger.h"
 #include "utils.h"
-
-using high_resolution_time = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
 const auto BLACK = color3(0.0, 0.0, 0.0);
 const auto WHITE = color3(1.0, 1.0, 1.0);
@@ -34,19 +31,14 @@ class camera {
         double  defocus_angle       = 0;
         double  focus_dist          = 10;
 
-        color3matrix render(std::shared_ptr<collection> scene) {
+        color3matrix render(std::shared_ptr<collection> scene, std::string mode = "full") {
             initialize();
+
+            logger log(image_width * image_height);
             color3matrix matrix;
 
-            /* Log Info */
-            const auto start = std::chrono::high_resolution_clock::now();
-            int progress_in_pixels = 0;
-            int progress_in_percentage = int(
-                100 * progress_in_pixels
-                / (image_height * image_width)
-            );
+            log.start();
 
-            /* Main Render Cicle */
             for (int j = 0; j < image_height; j += 1) {
                 std::vector<color3> row;
 
@@ -55,17 +47,18 @@ class camera {
 
                     for (int s = 0; s < samples_per_pixel; s += 1) {
                         auto camera_ray = getRay(i, j);
-                        pixel += getColor(camera_ray, max_depth, scene);
+                        pixel += getColor(camera_ray, max_depth, scene, mode);
                     }
 
                     row.push_back(write_pixel(pixel_samples_scale * pixel));
-                    progress(start, progress_in_pixels, progress_in_percentage);
+
+                    log.tick();
                 }
 
                 matrix.push_back(row);
             }
 
-            completed(start);
+            log.end();
 
             return matrix;
         }
@@ -80,9 +73,6 @@ class camera {
         vec3    u, v, w;
         vec3    defocus_disk_u;
         vec3    defocus_disk_v;
-
-        // [depth, freq]
-        std::unordered_map<int, int> calls_cache;
 
         void initialize() {
             image_height = int(image_width / aspect_ratio);
@@ -116,56 +106,6 @@ class camera {
             defocus_disk_v = v * defocus_radius;
         }
 
-        void progress(const high_resolution_time& start, int& progress_in_pixels, int& progress_in_percentage) {
-            int progress_new = int(
-                100 * (progress_in_pixels += 1)
-                / (image_height * image_width)
-            );
-
-            if (progress_new != progress_in_percentage) {
-                std::cout
-                    << "\rPixels rendered = "
-                    << progress_new << "%"
-                    << "\tTime = "
-                    << benchmark(start)
-                    << std::flush;
-
-                progress_in_percentage = progress_new;
-            }
-        }
-
-        void completed(const high_resolution_time& start) {
-            std::cout << "\nDepth stats:" << std::endl;
-
-            for (auto& p : calls_cache) {
-                std::cout << "d = " << p.first << "\tcount = " << p.second << std::endl;
-            }
-
-            std::cout
-                << "[C++] Render completed in time "
-                << benchmark(start)
-                << std::endl;
-        }
-
-        std::string benchmark(const high_resolution_time& start) {
-            const auto end = std::chrono::high_resolution_clock::now();
-            const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-
-            auto minutes = std::chrono::duration_cast<std::chrono::minutes>(duration % std::chrono::hours(1)).count();
-            auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration % std::chrono::minutes(1)).count();
-
-            return std::to_string(minutes) + ":"
-                + (seconds < 10 ? "0" : "") + std::to_string(seconds);
-        };
-
-        void save_to_cache(int depth) {
-            if (calls_cache.find(depth) != calls_cache.end()) {
-                calls_cache[depth] += 1;
-            } else {
-                calls_cache[depth] = 1;
-            }
-        }
-
         vec3 sample_square() {
             return vec3(
                 random_double() - 0.5,
@@ -191,9 +131,7 @@ class camera {
             return (1.0 - a) * color3(1.0, 1.0, 1.0) + a * color3(0.5, 0.7, 1.0);
         }
 
-        color3 getColor(const ray& camera_ray, int depth, std::shared_ptr<collection> scene) {
-            save_to_cache(depth);
-
+        color3 getColor(const ray& camera_ray, int depth, std::shared_ptr<collection> scene, std::string mode) {
             if (depth < 0) {
                 return BLACK;
             }
@@ -202,14 +140,29 @@ class camera {
             interval hit_interval(0.001, std::numeric_limits<double>::infinity());
 
             if (scene->hit(camera_ray, hit_interval, rec)) {
-                ray scattered;
-                color3 attenuation;
-
-                if (rec.mat->scatter(camera_ray, rec, attenuation, scattered)) {
-                    return attenuation * getColor(scattered, depth - 1, scene);
+                if (mode == "in-depth") {
+                    double gray = std::exp(-rec.t);
+                    return color3(gray, gray, gray);
                 }
 
-                return BLACK;
+                if (mode == "normales") {
+                    double R = (rec.normal.x() + 1.0) / 2;
+                    double G = (rec.normal.y() + 1.0) / 2;
+                    double B = (rec.normal.z() + 1.0) / 2;
+
+                    return color3(R, G, B);
+                }
+
+                if (mode == "full") {
+                    ray scattered;
+                    color3 attenuation;
+
+                    if (rec.mat->scatter(camera_ray, rec, attenuation, scattered)) {
+                        return attenuation * getColor(scattered, depth - 1, scene, mode);
+                    }
+
+                    return BLACK;
+                }
             }
 
             return getSky(camera_ray);
