@@ -12,20 +12,21 @@
 #include "collection.h"
 #include "sphere.h"
 #include "camera.h"
-#include "options.h"
-
-#include "examples/scene_1.h"
-#include "examples/scene_2.h"
-#include "examples/scene_3.h"
-#include "examples/scene_4.h"
+#include "params.h"
+#include "reader.h"
 
 int main(int argc, char* argv[]) {
-    std::cout << "[RayTracer v1.8.0] running..." << std::endl;
+    std::cout << "[RayTracer v1.9.0] running..." << std::endl;
+    auto [ mode, obj_file, opt_file, output ] = parse_params(argc, argv);
 
-    auto options = parse_options(argc, argv);
+    auto objects = reader::read_objects(obj_file);
+    auto cam_opts = reader::read_camera_opts(opt_file);
 
-    auto matrix = renderScene2(getScene2(), options.mode);
-    create_png(matrix, options.output);
+    camera cam;
+    cam.setup(cam_opts);
+
+    auto matrix = cam.render(objects, mode);
+    create_png(matrix, output);
 
     return 0;
 }

@@ -3,6 +3,25 @@
 
 #include <algorithm>
 
+/*
+
+Lambertian: diffuse
+	Kd = albedo (the main surface color)
+	Ka = ambient lighting
+	Ks = 0
+
+Metal: specular (mirror)
+	Ks = metal color (specular reflection is tinted by the material color: gold – yellowish, copper – reddish, etc.)
+	Ka = 0 (not used)
+	Kd = 0
+
+Dielectric: refraction
+	Kd = albedo (the color of the material that is scattered inside)
+	Ks = a fixed small value (usually white reflection ~0.04)
+	Ka ≈ not used
+
+*/
+
 class material {
 	public:
 		virtual ~material() = default;

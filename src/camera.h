@@ -15,15 +15,28 @@
 const auto BLACK = color3(0.0, 0.0, 0.0);
 const auto WHITE = color3(1.0, 1.0, 1.0);
 
+const auto MODE_DEPT = "dept";
+const auto MODE_NORM = "norm";
+const auto MODE_FULL = "full";
+
+struct camera_opts {
+    double  aspect_ratio;
+    int     image_width;
+    int     samples_per_pixel;
+    int     max_depth;
+    double  vfov;
+    point3  lookfrom;
+    point3  lookat;
+    vec3    vup;
+};
+
 class camera {
     public:
         double  aspect_ratio        = 1.0;
         int     image_width         = 100;
         int     samples_per_pixel   = 10;
         int     max_depth           = 10;
-
         double  vfov                = 90;
-
         point3  lookfrom            = point3(0, 0, 0);      // Point camera is looking from
         point3  lookat              = point3(0, 0, -1);     // Point camera is looking at
         vec3    vup                 = vec3(0, 1, 0);        // Camera "up" direction
@@ -31,7 +44,18 @@ class camera {
         double  defocus_angle       = 0;
         double  focus_dist          = 10;
 
-        color3matrix render(std::shared_ptr<collection> scene, std::string mode = "full") {
+        void setup(const camera_opts& cam_opts) {
+            aspect_ratio        = cam_opts.aspect_ratio;
+            image_width         = cam_opts.image_width;
+            samples_per_pixel   = cam_opts.samples_per_pixel;
+            max_depth           = cam_opts.max_depth;
+            vfov                = cam_opts.vfov;
+            lookfrom            = cam_opts.lookfrom;
+            lookat              = cam_opts.lookat;
+            vup                 = cam_opts.vup;
+        }
+
+        color3matrix render(std::shared_ptr<collection> scene, std::string mode = MODE_FULL) {
             initialize();
 
             logger log(image_width * image_height);
@@ -140,12 +164,13 @@ class camera {
             interval hit_interval(0.001, std::numeric_limits<double>::infinity());
 
             if (scene->hit(camera_ray, hit_interval, rec)) {
-                if (mode == "in-depth") {
+
+                if (mode == MODE_DEPT) {
                     double gray = std::exp(-rec.t);
                     return color3(gray, gray, gray);
                 }
 
-                if (mode == "normales") {
+                if (mode == MODE_NORM) {
                     double R = (rec.normal.x() + 1.0) / 2;
                     double G = (rec.normal.y() + 1.0) / 2;
                     double B = (rec.normal.z() + 1.0) / 2;
@@ -153,7 +178,7 @@ class camera {
                     return color3(R, G, B);
                 }
 
-                if (mode == "full") {
+                if (mode == MODE_FULL) {
                     ray scattered;
                     color3 attenuation;
 
@@ -163,6 +188,9 @@ class camera {
 
                     return BLACK;
                 }
+
+                std::cerr << "[Render] unknown render mode: " << mode << std::endl;
+                exit(1);
             }
 
             return getSky(camera_ray);

@@ -6,12 +6,10 @@
 
 class sphere : public hittable {
     public:
-        sphere(const point3& center, double radius, std::shared_ptr<material> mat, std::string n)
+        sphere(const point3& center, double radius, std::shared_ptr<material> mat)
             : center(center)
             , radius(radius)
-            , mat(mat) {
-                name = n; // for debug
-            }
+            , mat(mat) {}
 
         bool hit(const ray& r, interval& i, hit_record& rec) const override {
             auto OC = center - r.origin();
@@ -44,8 +42,6 @@ class sphere : public hittable {
 
             return true;
         }
-
-        std::string name; // for debug
 
     private:
         point3 center;
