@@ -157,7 +157,7 @@ class camera {
 
         color3 getColor(const ray& camera_ray, int depth, std::shared_ptr<collection> scene, std::string mode) {
             if (depth < 0) {
-                return BLACK;
+                getSky(camera_ray);
             }
 
             hit_record rec;

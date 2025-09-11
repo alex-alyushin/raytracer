@@ -83,6 +83,10 @@ inline std::ostream& operator<<(std::ostream& out, const vec3& v) {
     return out << v.x() << " " << v.y() << " " << v.z();
 }
 
+/******************/
+/* Vector algebra */
+/******************/
+
 inline vec3 operator+(const vec3& u, const vec3& v) {
     return vec3(
         u.x() + v.x(),
@@ -139,6 +143,10 @@ inline vec3 cross(const vec3& v, const vec3& u) {
     );
 }
 
+/******************/
+/* Random vectors */
+/******************/
+
 inline vec3 random_in_unit_disk() {
     while (true) {
         auto p = vec3(
@@ -170,18 +178,6 @@ inline vec3 random_on_hemisphere(const vec3& normal) {
     }
 
     return -on_unit_sphere;
-}
-
-inline vec3 mirror_reflect(const vec3& v, const vec3& n) {
-    return -2 * dot(v, n) * n + v;
-}
-
-inline vec3 refract_by_snell(const vec3& v, const vec3& n, double etai) {
-    auto cos = std::fmin(dot(-v, n), 1.0);
-    auto ray_out_normal = etai * (v + cos * n);
-    auto ray_out_tangent = -std::sqrt(std::fabs(1.0 - ray_out_normal.length_squared())) * n;
-
-    return ray_out_normal + ray_out_tangent;
 }
 
 #endif

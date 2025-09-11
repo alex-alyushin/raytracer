@@ -29,8 +29,10 @@ class sphere : public hittable {
 
             if (!i.surrounds(root)) {
                 root = (H + sqrtd) / a;
-            if (!i.surrounds(root))
-                return false;
+
+                if (!i.surrounds(root)) {
+                    return false;
+                }
             }
 
             rec.t = root;
