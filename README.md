@@ -2,9 +2,7 @@
 
 This is a simple realization of a [ray tracing algorithm](https://en.wikipedia.org/wiki/Ray_tracing_(graphics)).
 
-![pic-1](src/renders/metal-diffuse-metal-sky.png)
-
-![pic-1](src/renders/metal-2-metal.png)
+![balls.png](scenes/balls.png)
 
 ### Build Renderer
 
