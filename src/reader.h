@@ -6,29 +6,28 @@
 #include <sstream>
 #include <string>
 
-using material_lib = std::unordered_map<std::string, std::shared_ptr<material>>;
-
 class reader {
     public:
         static std::shared_ptr<collection> read_objects(const std::string& filename);
         static camera_opts read_camera_opts(const std::string& filename);
     private:
-        static material_lib read_materials(const std::string& filename);
+        static materials_t read_materials(const std::string& filename);
 };
 
 std::shared_ptr<collection> reader::read_objects(const std::string& filename) {
-    std::cout << "[OBJ] " << filename << std::endl;
-
+    std::cout << "[obj] reading file: " << filename << std::endl;
     std::ifstream file(filename);
+
     if (!file.is_open()) {
-        std::cerr << "[OBJ] cannot read objects" << std::endl;
+        std::cerr << "[obj] cannot read objects" << std::endl;
         exit(1);
     }
 
     auto scene = std::make_shared<collection>();
 
     std::shared_ptr<material> current_material = nullptr;
-    material_lib materials;
+    materials_t materials;
+
     std::string line;
 
     while (std::getline(file, line)) {
@@ -89,7 +88,7 @@ std::shared_ptr<collection> reader::read_objects(const std::string& filename) {
             // Face
             if (tokens[0] == "f") {}
 
-            // Lighter          P x y z R G B
+            // Lighter
             if (tokens[0] == "P") {}
         }
     }
@@ -99,35 +98,111 @@ std::shared_ptr<collection> reader::read_objects(const std::string& filename) {
     return scene;
 }
 
-material_lib reader::read_materials(const std::string& filename) {
-    std::cout << "[MTL] " << filename << std::endl;
-
+materials_t reader::read_materials(const std::string& filename) {
+    std::cout << "[mtl] reading file: " << filename << std::endl;
     std::ifstream file(filename);
+
     if (!file.is_open()) {
-        std::cerr << "[MTL] cannot read materials" << std::endl;
+        std::cerr << "[mtl] cannot read materials" << std::endl;
         exit(1);
     }
 
-    material_lib lib;
+    std::shared_ptr<mtl_model> current_model = nullptr;
+    mtl_models_t mtl_models;
+    materials_t materials;
 
-    // @todo: implement mtl file parsing
-    auto metal_stub = std::make_shared<metal>(color3(0.8, 0.6, 0.2), 0);
-    auto dielectric_stub = std::make_shared<dielectric>(1.333);
-    lib["leftSphere"] = dielectric_stub;
-    lib["rightSphere"] = dielectric_stub;
+    std::string line;
 
-    // newmtl name
-    // Ka (ambient_color) it is the light from nowhere
-    // Kd (diffuse_color)
-    // Ks (specular_color)
-    // Ke (intensity) as additive addition to ambient_color
-    // Ns (specular_exponent)
-    // Ni (refraction_index)
-    // al (abledo)
+    while (std::getline(file, line)) {
+        std::string word;
+        std::vector<std::string> tokens;
+        std::istringstream iss(line);
+
+        while (iss >> word) {
+            if (!word.empty()) {
+                tokens.push_back(word);
+            }
+        }
+
+        if (!tokens.empty()) {
+
+            if (tokens[0] == "newmtl") {
+                std::string name = tokens[1];
+                current_model = std::make_shared<mtl_model>();
+                current_model->name = name;
+                mtl_models[name] = current_model;
+            }
+
+            if (tokens[0] == "Ka") {
+                current_model->ambient_color = color3(
+                    std::stod(tokens[1]),
+                    std::stod(tokens[2]),
+                    std::stod(tokens[3])
+                );
+            }
+
+            if (tokens[0] == "Kd") {
+                current_model->diffuse_color = color3(
+                    std::stod(tokens[1]),
+                    std::stod(tokens[2]),
+                    std::stod(tokens[3])
+                );
+            }
+
+            if (tokens[0] == "Ks") {
+                current_model->specular_color = color3(
+                    std::stod(tokens[1]),
+                    std::stod(tokens[2]),
+                    std::stod(tokens[3])
+                );
+            }
+
+            if (tokens[0] == "Ke") {
+                current_model->intensity = color3(
+                    std::stod(tokens[1]),
+                    std::stod(tokens[2]),
+                    std::stod(tokens[3])
+                );
+            }
+
+            // @todo: implement
+            // Ns (specular_exponent)
+            // Ni (refraction_index)
+            // al (abledo)
+        }
+    }
 
     file.close();
 
-    return lib;
+    for (auto& [ name, model ] : mtl_models) {
+        std::shared_ptr<material> mat;
+
+        /* Lambertian */
+        if (model->diffuse_color.length_squared() > 0.001) {
+            mat = std::make_shared<lambertian>(
+                model->diffuse_color
+            );
+        }
+
+        /* Metal */
+        else if (model->specular_color.length_squared() > 0.001) {
+            mat = std::make_shared<metal>(
+                model->specular_color,
+                0.0
+            );
+        }
+
+        /* Dielectric */
+        else if (false/* Tr > 0 && Ni > 0 */) {
+        }
+
+        else {
+        }
+
+        materials[name] = mat;
+    }
+
+    return materials;
 }
 
 camera_opts reader::read_camera_opts(const std::string& filename) {

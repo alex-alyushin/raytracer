@@ -19,13 +19,14 @@ int main(int argc, char* argv[]) {
     std::cout << "[RayTracer v1.9.0] running..." << std::endl;
     auto [ mode, obj_file, opt_file, output ] = parse_params(argc, argv);
 
-    auto objects = reader::read_objects(obj_file);
-    auto cam_opts = reader::read_camera_opts(opt_file);
-
     camera cam;
-    cam.setup(cam_opts);
 
-    auto matrix = cam.render(objects, mode);
+    auto opts = reader::read_camera_opts(opt_file);
+    cam.initialize(opts);
+
+    auto scene = reader::read_objects(obj_file);
+    auto matrix = cam.render(scene, mode);
+
     create_png(matrix, output);
 
     return 0;

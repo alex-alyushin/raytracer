@@ -1,0 +1,15 @@
+# Two metal balls scene
+
+mtllib scenes/balls.mtl
+
+# Ground
+usemtl ground
+S 0.0 -100.5 -1.0 100.0
+
+# Left sphere
+usemtl leftSphere
+S -0.5 0.0 -1.0 0.5
+
+# Right sphere
+usemtl rightSphere
+S 0.5 0.0 -1.0 0.5

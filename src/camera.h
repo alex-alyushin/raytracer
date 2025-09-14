@@ -44,23 +44,23 @@ class camera {
         double  defocus_angle       = 0;
         double  focus_dist          = 10;
 
-        void setup(const camera_opts& cam_opts) {
-            aspect_ratio        = cam_opts.aspect_ratio;
-            image_width         = cam_opts.image_width;
-            samples_per_pixel   = cam_opts.samples_per_pixel;
-            max_depth           = cam_opts.max_depth;
-            vfov                = cam_opts.vfov;
-            lookfrom            = cam_opts.lookfrom;
-            lookat              = cam_opts.lookat;
-            vup                 = cam_opts.vup;
+        void initialize(const camera_opts& opts) {
+            aspect_ratio        = opts.aspect_ratio;
+            image_width         = opts.image_width;
+            samples_per_pixel   = opts.samples_per_pixel;
+            max_depth           = opts.max_depth;
+            vfov                = opts.vfov;
+            lookfrom            = opts.lookfrom;
+            lookat              = opts.lookat;
+            vup                 = opts.vup;
+
+            setup();
         }
 
         color3matrix render(std::shared_ptr<collection> scene, std::string mode = MODE_FULL) {
-            initialize();
-
-            logger log(image_width * image_height);
             color3matrix matrix;
 
+            logger log(image_width * image_height);
             log.start();
 
             for (int j = 0; j < image_height; j += 1) {
@@ -70,12 +70,12 @@ class camera {
                     color3 pixel = BLACK;
 
                     for (int s = 0; s < samples_per_pixel; s += 1) {
-                        auto camera_ray = getRay(i, j);
-                        pixel += getColor(camera_ray, max_depth, scene, mode);
+                        pixel += get_color(get_ray(i, j), scene, max_depth, mode);
+                        // @todo: move all physics info class scene
+                        // pixel += scene.illuminance(get_ray(i, j), max_depth, mode);
                     }
 
                     row.push_back(write_pixel(pixel_samples_scale * pixel));
-
                     log.tick();
                 }
 
@@ -98,7 +98,7 @@ class camera {
         vec3    defocus_disk_u;
         vec3    defocus_disk_v;
 
-        void initialize() {
+        void setup() {
             image_height = int(image_width / aspect_ratio);
             image_height = (image_height < 1) ? 1 : image_height;
 
@@ -138,8 +138,9 @@ class camera {
             );
         }
 
-        ray getRay(int i, int j) {
+        ray get_ray(int i, int j) {
             vec3 randon_offset = sample_square();
+
             vec3 direction = pixel00_loc
                 + (i + randon_offset.x()) * pixel_delta_u
                 + (j + randon_offset.y()) * pixel_delta_v
@@ -148,16 +149,16 @@ class camera {
             return ray(center, direction);
         }
 
-        color3 getSky(const ray& camera_ray) {
+        color3 get_sky(const ray& camera_ray) {
             auto unit_direction = unit_vector(camera_ray.direction());
             auto a = 0.5 * (unit_direction.y() + 1.0);
 
             return (1.0 - a) * color3(1.0, 1.0, 1.0) + a * color3(0.5, 0.7, 1.0);
         }
 
-        color3 getColor(const ray& camera_ray, int depth, std::shared_ptr<collection> scene, std::string mode) {
+        color3 get_color(const ray& camera_ray, std::shared_ptr<collection> scene, int depth, std::string mode) {
             if (depth < 0) {
-                getSky(camera_ray);
+                return get_sky(camera_ray);
             }
 
             hit_record rec;
@@ -183,7 +184,7 @@ class camera {
                     color3 attenuation;
 
                     if (rec.mat->scatter(camera_ray, rec, attenuation, scattered)) {
-                        return attenuation * getColor(scattered, depth - 1, scene, mode);
+                        return attenuation * get_color(scattered, scene, depth - 1, mode);
                     }
 
                     return BLACK;
@@ -193,7 +194,7 @@ class camera {
                 exit(1);
             }
 
-            return getSky(camera_ray);
+            return get_sky(camera_ray);
         }
 };
 

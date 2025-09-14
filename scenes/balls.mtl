@@ -1,0 +1,10 @@
+# Two metal balls scene
+
+newmtl ground
+Kd 0.8 0.8 0.0
+
+newmtl leftSphere
+Ks 0.8 0.8 0.8
+
+newmtl rightSphere
+Ks 0.8 0.6 0.2

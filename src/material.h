@@ -23,11 +23,33 @@ Dielectric: refraction
 
 */
 
+struct mtl_model {
+    std::string name;
+
+    color3 ambient_color        = color3(0, 0, 0);
+    color3 diffuse_color        = color3(0, 0, 0);
+    color3 specular_color       = color3(0, 0, 0);
+    color3 intensity            = color3(0, 0, 0);
+    color3 albedo               = color3(1, 0, 0);
+
+    double specular_exponent;
+    double refraction_index;
+};
+
+using mtl_models_t = std::unordered_map<std::string, std::shared_ptr<mtl_model>>;
+
 class material {
 	public:
 		virtual ~material() = default;
-		virtual bool scatter(const ray& r_in, const hit_record& rec, color3& attenuation, ray& scattered) const = 0;
+		virtual bool scatter(
+			const ray& r_in,
+			const hit_record& rec,
+			color3& attenuation,
+			ray& scattered
+		) const = 0;
 };
+
+using materials_t = std::unordered_map<std::string, std::shared_ptr<material>>;
 
 class lambertian : public material {
 	public:
