@@ -12,11 +12,10 @@ inline double degrees_to_radians(double degrees) {
 }
 
 inline double random_double(double min, double max) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<double> dist(min, max);
+    static std::mt19937 gen(std::random_device{}());
+    static std::uniform_real_distribution<double> dist(0.0, 1.0);
 
-    return dist(gen);
+    return min + (max - min) * dist(gen);
 }
 
 inline double random_double() {

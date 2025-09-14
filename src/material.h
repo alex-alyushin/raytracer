@@ -80,7 +80,7 @@ class metal : public material {
 			, fuzz(std::min(fuzz, 1.0)) {}
 
 		bool scatter(const ray& r_in, const hit_record& rec, color3& attenuation, ray& scattered) const override {
-			auto reflected = specular_reflected_vec(r_in.direction(), rec.normal);
+			auto reflected = specular_reflected_vec(r_in.direction(), rec.normal)
 				+ fuzz * random_unit_vector();
 
 			scattered = ray(rec.point, reflected);
