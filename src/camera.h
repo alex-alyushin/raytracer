@@ -10,7 +10,7 @@
 #include "material.h"
 #include "ray.h"
 #include "logger.h"
-#include "utils.h"
+#include "random.h"
 
 const auto BLACK = color3(0.0, 0.0, 0.0);
 const auto WHITE = color3(1.0, 1.0, 1.0);
@@ -18,6 +18,12 @@ const auto WHITE = color3(1.0, 1.0, 1.0);
 const auto MODE_DEPT = "dept";
 const auto MODE_NORM = "norm";
 const auto MODE_FULL = "full";
+
+inline double degrees_to_radians(double degrees) {
+    static const double pi = 3.141592653589793;
+
+    return degrees * pi / 180.0;
+}
 
 struct camera_opts {
     double  aspect_ratio;
@@ -60,8 +66,8 @@ class camera {
         color3matrix render(std::shared_ptr<collection> scene, std::string mode = MODE_FULL) {
             color3matrix matrix;
 
-            logger log(image_width * image_height);
-            log.start();
+            logger logger(image_width * image_height);
+            logger.start();
 
             for (int j = 0; j < image_height; j += 1) {
                 std::vector<color3> row;
@@ -70,19 +76,19 @@ class camera {
                     color3 pixel = BLACK;
 
                     for (int s = 0; s < samples_per_pixel; s += 1) {
-                        pixel += get_color(get_ray(i, j), scene, max_depth, mode);
+                        pixel += get_color(get_ray(i, j), scene, mode, max_depth);
                         // @todo: move all physics info class scene
-                        // pixel += scene.illuminance(get_ray(i, j), max_depth, mode);
+                        // pixel += scene.illuminance(get_ray(i, j), mode, max_depth);
                     }
 
-                    row.push_back(write_pixel(pixel_samples_scale * pixel));
-                    log.tick();
+                    row.push_back(image::intensity_to_color(pixel_samples_scale * pixel));
+                    logger.tick();
                 }
 
                 matrix.push_back(row);
             }
 
-            log.end();
+            logger.end();
 
             return matrix;
         }
@@ -131,11 +137,7 @@ class camera {
         }
 
         vec3 sample_square() {
-            return vec3(
-                random_double() - 0.5,
-                random_double() - 0.5,
-                0
-            );
+            return 0.5 * random_in_unit_square();
         }
 
         ray get_ray(int i, int j) {
@@ -156,15 +158,15 @@ class camera {
             return (1.0 - a) * color3(1.0, 1.0, 1.0) + a * color3(0.5, 0.7, 1.0);
         }
 
-        color3 get_color(const ray& camera_ray, std::shared_ptr<collection> scene, int depth, std::string mode) {
+        color3 get_color(const ray& camera_ray, std::shared_ptr<collection> scene, std::string mode, int depth) {
             if (depth < 0) {
                 return get_sky(camera_ray);
             }
 
             hit_record rec;
-            interval hit_interval(0.001, std::numeric_limits<double>::infinity());
+            interval interval(0.001);
 
-            if (scene->hit(camera_ray, hit_interval, rec)) {
+            if (scene->hit(camera_ray, interval, rec)) {
 
                 if (mode == MODE_DEPT) {
                     double gray = std::exp(-rec.t);
@@ -184,7 +186,7 @@ class camera {
                     color3 attenuation;
 
                     if (rec.mat->scatter(camera_ray, rec, attenuation, scattered)) {
-                        return attenuation * get_color(scattered, scene, depth - 1, mode);
+                        return attenuation * get_color(scattered, scene, mode, depth - 1);
                     }
 
                     return BLACK;

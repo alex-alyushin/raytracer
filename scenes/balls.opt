@@ -1,8 +1,0 @@
-aspect_ratio=1.7778
-image_width=1800
-samples_per_pixel=50
-max_depth=50
-vfov=90
-lookfrom=0;0;0.4
-lookat=0;0;0
-vup=0;1;0

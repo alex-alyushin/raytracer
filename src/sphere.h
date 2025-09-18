@@ -11,12 +11,12 @@ class sphere : public hittable {
             , radius(radius)
             , mat(mat) {}
 
-        bool hit(const ray& r, interval& i, hit_record& rec) const override {
-            auto OC = center - r.origin();
-            auto H = dot(r.direction(), OC);
+        bool hit(const ray& ray, interval& interval, hit_record& rec) const override {
+            auto OC = center - ray.origin();
+            auto H = dot(ray.direction(), OC);
 
-            auto a = r.direction().length_squared();
-            auto c = OC.length_squared() - radius*radius;
+            auto a = ray.direction().length_squared();
+            auto c = OC.length_squared() - radius * radius;
 
             auto discriminant = H * H - a * c;
 
@@ -27,20 +27,20 @@ class sphere : public hittable {
             auto sqrtd = std::sqrt(discriminant);
             auto root = (H - sqrtd) / a;
 
-            if (!i.surrounds(root)) {
+            if (!interval.surrounds(root)) {
                 root = (H + sqrtd) / a;
 
-                if (!i.surrounds(root)) {
+                if (!interval.surrounds(root)) {
                     return false;
                 }
             }
 
-            rec.t = root;
-            rec.point = r.at(rec.t);
-            rec.mat = mat;
+            rec.t       = root;
+            rec.point   = ray.at(rec.t);
+            rec.mat     = mat;
 
             vec3 outward_normal = (rec.point - center) / radius;
-            rec.set_face_normal(r, outward_normal);
+            rec.set_face_normal(ray, outward_normal);
 
             return true;
         }

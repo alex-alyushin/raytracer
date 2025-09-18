@@ -6,7 +6,7 @@
 class hittable {
     public:
         virtual ~hittable() = default;
-        virtual bool hit(const ray& r, interval& i, hit_record& rec) const = 0;
+        virtual bool hit(const ray& ray, interval& interval, hit_record& rec) const = 0;
 };
 
 #endif

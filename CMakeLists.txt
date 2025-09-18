@@ -10,8 +10,6 @@ set ( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0" )
 set ( EXTERNAL )
 set ( SOURCE_RAY_TRACER src/main.cc )
 
-include_directories(src)
-
 message (STATUS "Compiler ID: " ${CMAKE_CXX_COMPILER_ID})
 message (STATUS "Release flags: " ${CMAKE_CXX_FLAGS_RELEASE})
 message (STATUS "Debug flags: " ${CMAKE_CXX_FLAGS_DEBUG})
@@ -44,6 +42,11 @@ FetchContent_Declare(
     GIT_TAG master
 )
 FetchContent_MakeAvailable(stb)
-target_include_directories(rt PRIVATE ${stb_SOURCE_DIR})
+
+target_include_directories(rt PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/utils
+    ${stb_SOURCE_DIR}
+)
 
 message(STATUS "Build completed!")

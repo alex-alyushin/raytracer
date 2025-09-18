@@ -1,25 +1,24 @@
-#ifndef READER_H
-#define READER_H
+#ifndef FILE_READER_H
+#define FILE_READER_H
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 
-class reader {
+class file_reader {
     public:
-        static std::shared_ptr<collection> read_objects(const std::string& filename);
-        static camera_opts read_camera_opts(const std::string& filename);
+        static std::shared_ptr<collection> read_scene(const std::string& filename);
     private:
         static materials_t read_materials(const std::string& filename);
 };
 
-std::shared_ptr<collection> reader::read_objects(const std::string& filename) {
-    std::cout << "[obj] reading file: " << filename << std::endl;
+std::shared_ptr<collection> file_reader::read_scene(const std::string& filename) {
+    std::cout << "[FileReader] reading obj file: " << filename << std::endl;
     std::ifstream file(filename);
 
     if (!file.is_open()) {
-        std::cerr << "[obj] cannot read objects" << std::endl;
+        std::cerr << "[FileReader] cannot read obj file" << std::endl;
         exit(1);
     }
 
@@ -98,12 +97,12 @@ std::shared_ptr<collection> reader::read_objects(const std::string& filename) {
     return scene;
 }
 
-materials_t reader::read_materials(const std::string& filename) {
-    std::cout << "[mtl] reading file: " << filename << std::endl;
+materials_t file_reader::read_materials(const std::string& filename) {
+    std::cout << "[FileReader] reading mtl file: " << filename << std::endl;
     std::ifstream file(filename);
 
     if (!file.is_open()) {
-        std::cerr << "[mtl] cannot read materials" << std::endl;
+        std::cerr << "[FileReader] cannot read mtl file" << std::endl;
         exit(1);
     }
 
@@ -165,7 +164,8 @@ materials_t reader::read_materials(const std::string& filename) {
                 );
             }
 
-            // @todo: implement
+            // @todo: implement also
+
             // Ns (specular_exponent)
             // Ni (refraction_index)
             // al (abledo)
@@ -190,6 +190,9 @@ materials_t reader::read_materials(const std::string& filename) {
                 model->specular_color,
                 0.0
             );
+            // mat = std::make_shared<dielectric>(
+            //     1.3333
+            // );
         }
 
         /* Dielectric */
@@ -203,75 +206,6 @@ materials_t reader::read_materials(const std::string& filename) {
     }
 
     return materials;
-}
-
-camera_opts reader::read_camera_opts(const std::string& filename) {
-    camera_opts opts;
-    std::ifstream file(filename);
-    std::string line;
-
-    while (std::getline(file, line)) {
-        if (line.empty()) {
-            continue;
-        }
-
-        auto pos = line.find('=');
-
-        if (pos == std::string::npos) {
-            continue;
-        }
-
-        std::string key = line.substr(0, pos);
-        std::string val = line.substr(pos + 1);
-
-        if (key == "aspect_ratio") {
-            opts.aspect_ratio = std::stod(val);
-        }
-
-        else if (key == "image_width") {
-            opts.image_width = std::stoi(val);
-        }
-
-        else if (key == "samples_per_pixel") {
-            opts.samples_per_pixel = std::stoi(val);
-        }
-
-        else if (key == "max_depth") {
-            opts.max_depth = std::stoi(val);
-        }
-
-        else if (key == "vfov") {
-            opts.vfov = std::stod(val);
-        }
-
-        else if (key == "lookfrom" || key == "lookat" || key == "vup") {
-            std::stringstream ss(val);
-
-            double x, y, z;
-            char comma;
-
-            ss
-                >> x
-                >> comma
-                >> y
-                >> comma
-                >> z;
-
-            if (key == "lookfrom") {
-                opts.lookfrom = point3(x, y, z);
-            }
-
-            else if (key == "lookat") {
-                opts.lookat = point3(x, y, z);
-            }
-
-            else if (key == "vup") {
-                opts.vup = vec3(x, y, z);
-            }
-        }
-    }
-
-    return opts;
 }
 
 #endif

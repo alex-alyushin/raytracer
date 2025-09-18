@@ -8,10 +8,19 @@ class interval {
         double min, max;
 
         interval()
-        : min(-std::numeric_limits<double>::infinity())
-        , max(+std::numeric_limits<double>::infinity()) {}
+            : min(-std::numeric_limits<double>::infinity())
+            , max(+std::numeric_limits<double>::infinity()) {
+        }
 
-        interval(double min, double max) : min(min), max(max) {}
+        interval(double min)
+            : min(min)
+            , max(+std::numeric_limits<double>::infinity()) {
+        }
+
+        interval(double min, double max)
+            : min(min)
+            , max(max) {
+        }
 
         double size() const {
             return max - min;

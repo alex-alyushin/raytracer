@@ -3,7 +3,7 @@
 
 #include <cmath>
 #include <iostream>
-#include "utils.h"
+#include "random.h"
 
 class vec3 {
     public:
@@ -60,14 +60,6 @@ class vec3 {
                 && (std::fabs(e[2]) < delta);
         }
 
-        static vec3 random() {
-            return vec3(
-                random_double(),
-                random_double(),
-                random_double()
-            );
-        }
-
         static vec3 random(double min, double max) {
             return vec3(
                 random_double(min, max),
@@ -77,15 +69,21 @@ class vec3 {
         }
 };
 
-using point3 = vec3;
+/***********/
+/* Aliases */
+/***********/
+
+using point3        = vec3;
+using color3        = vec3;
+using color3matrix  = std::vector<std::vector<color3>>;
+
+/********************/
+/* Binary operators */
+/********************/
 
 inline std::ostream& operator<<(std::ostream& out, const vec3& v) {
     return out << v.x() << " " << v.y() << " " << v.z();
 }
-
-/******************/
-/* Vector algebra */
-/******************/
 
 inline vec3 operator+(const vec3& u, const vec3& v) {
     return vec3(
@@ -147,13 +145,17 @@ inline vec3 cross(const vec3& v, const vec3& u) {
 /* Random vectors */
 /******************/
 
+inline vec3 random_in_unit_square() {
+    return vec3(
+        random_double(-1, 1),
+        random_double(-1, 1),
+        0
+    );
+}
+
 inline vec3 random_in_unit_disk() {
     while (true) {
-        auto p = vec3(
-            random_double(-1, 1),
-            random_double(-1, 1),
-            0
-        );
+        auto p = random_in_unit_square();
 
         if (p.length_squared() < 1)
             return p;

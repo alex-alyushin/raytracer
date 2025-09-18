@@ -14,19 +14,5 @@ $ cmake --build build
 ### Usage
 
 ```bash
-$ ./build/rt \
-    [--obj=<path>] \
-    [--opt=<path>] \
-    [--mode=full|dept|norm] \
-    [--output=<path>]
+$ ./build/rt --cfg=scenes/balls.cfg
 ```
-
-<details>
-    <summary>OPTIONS</summary>
-
-    --obj       Path to the Wavefront .obj file
-    --opt       Path to the camera options .opt file
-    --mode      Rendering mode: full, dept, norm
-    --output    Path to the output .png image file
-
-</details>

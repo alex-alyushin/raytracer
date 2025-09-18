@@ -24,7 +24,7 @@ class logger {
                 progress = progress_updated;
 
                 std::cout
-                    << "\r[C++] pixels rendered = " << progress << "%"
+                    << "\r[Render] pixels rendered = " << progress << "%"
                     << "\ttime = " << duration_time()
                     << std::flush;
             }
@@ -32,7 +32,7 @@ class logger {
 
         void end() {
             std::cout
-                << "\n[C++] render completed in time " << duration_time()
+                << "\n[Render] rendering completed in time " << duration_time()
                 << std::endl;
         }
 
