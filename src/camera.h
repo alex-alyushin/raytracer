@@ -6,11 +6,19 @@
 #include <ctime>
 #include <cmath>
 
-#include "hittable.h"
-#include "material.h"
 #include "ray.h"
+#include "collection.h"
 #include "logger.h"
-#include "random.h"
+
+// @todo: [scene] move it to scene
+// used just for method get_color
+#include "material.h"
+#include "hit_record.h"
+#include "interval.h"
+
+// @todo: [img] remove it
+// save intensities as is & post proccessing in image::proccess()
+#include "image.h"
 
 const auto BLACK = color3(0.0, 0.0, 0.0);
 const auto WHITE = color3(1.0, 1.0, 1.0);
@@ -21,36 +29,38 @@ const auto MODE_FULL = "full";
 
 inline double degrees_to_radians(double degrees) {
     static const double pi = 3.141592653589793;
-
     return degrees * pi / 180.0;
 }
 
 struct camera_opts {
-    double  aspect_ratio;
-    int     image_width;
-    int     samples_per_pixel;
-    int     max_depth;
-    double  vfov;
-    point3  lookfrom;
-    point3  lookat;
-    vec3    vup;
+    std::string mode;
+    double      aspect_ratio;
+    int         image_width;
+    int         samples_per_pixel;
+    int         max_depth;
+    double      vfov;
+    point3      lookfrom;
+    point3      lookat;
+    vec3        vup;
 };
 
 class camera {
     public:
-        double  aspect_ratio        = 1.0;
-        int     image_width         = 100;
-        int     samples_per_pixel   = 10;
-        int     max_depth           = 10;
-        double  vfov                = 90;
-        point3  lookfrom            = point3(0, 0, 0);      // Point camera is looking from
-        point3  lookat              = point3(0, 0, -1);     // Point camera is looking at
-        vec3    vup                 = vec3(0, 1, 0);        // Camera "up" direction
+        std::string mode                = MODE_FULL;
+        double      aspect_ratio        = 1.0;
+        int         image_width         = 100;
+        int         samples_per_pixel   = 10;
+        int         max_depth           = 10;
+        double      vfov                = 90;
+        point3      lookfrom            = point3(0, 0, 0);      // Point camera is looking from
+        point3      lookat              = point3(0, 0, -1);     // Point camera is looking at
+        vec3        vup                 = vec3(0, 1, 0);        // Camera "up" direction
 
-        double  defocus_angle       = 0;
-        double  focus_dist          = 10;
+        double      defocus_angle       = 0;
+        double      focus_dist          = 10;
 
         void initialize(const camera_opts& opts) {
+            mode                = opts.mode;
             aspect_ratio        = opts.aspect_ratio;
             image_width         = opts.image_width;
             samples_per_pixel   = opts.samples_per_pixel;
@@ -63,7 +73,7 @@ class camera {
             setup();
         }
 
-        color3matrix render(std::shared_ptr<collection> scene, std::string mode = MODE_FULL) {
+        color3matrix render(std::shared_ptr<collection> scene) {
             color3matrix matrix;
 
             logger logger(image_width * image_height);
@@ -76,11 +86,11 @@ class camera {
                     color3 pixel = BLACK;
 
                     for (int s = 0; s < samples_per_pixel; s += 1) {
+                        // @todo: [scene] intensity must be calculated in class scene
                         pixel += get_color(get_ray(i, j), scene, mode, max_depth);
-                        // @todo: move all physics info class scene
-                        // pixel += scene.illuminance(get_ray(i, j), mode, max_depth);
                     }
 
+                    // @todo: [img] save raw intensity
                     row.push_back(image::intensity_to_color(pixel_samples_scale * pixel));
                     logger.tick();
                 }

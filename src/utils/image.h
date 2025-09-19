@@ -5,11 +5,10 @@
 #include <string>
 #include <vector>
 
-#include "interval.h"
-#include "vec3.h"
-
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
+
+#include "vec3.h"
 
 class image {
     public:
@@ -65,12 +64,9 @@ color3 image::intensity_to_color(const color3& color) {
     G = image::linear_to_gamma(G);
     B = image::linear_to_gamma(B);
 
-    // In [0, 1]
-    static const interval value(0.000, 0.999);
-
-    auto rByte = int(256 * value.clamp(R));
-    auto gByte = int(256 * value.clamp(G));
-    auto bByte = int(256 * value.clamp(B));
+    auto rByte = int(256 * std::min(0.999, R));
+    auto gByte = int(256 * std::min(0.999, G));
+    auto bByte = int(256 * std::min(0.999, B));
 
     return color3(rByte, gByte, bByte);
 }

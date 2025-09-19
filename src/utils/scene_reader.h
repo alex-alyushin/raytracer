@@ -6,14 +6,19 @@
 #include <sstream>
 #include <string>
 
-class file_reader {
+// @todo: [scene] drop this includes
+// instead use method scene.add_shpere()
+#include "material.h"
+#include "sphere.h"
+
+class scene_reader {
     public:
-        static std::shared_ptr<collection> read_scene(const std::string& filename);
+        static std::shared_ptr<collection> read(const std::string& filename);
     private:
-        static materials_t read_materials(const std::string& filename);
+        static materials_t read_mtl(const std::string& filename);
 };
 
-std::shared_ptr<collection> file_reader::read_scene(const std::string& filename) {
+std::shared_ptr<collection> scene_reader::read(const std::string& filename) {
     std::cout << "[FileReader] reading obj file: " << filename << std::endl;
     std::ifstream file(filename);
 
@@ -47,7 +52,7 @@ std::shared_ptr<collection> file_reader::read_scene(const std::string& filename)
                     continue;
                 }
 
-                materials = read_materials(tokens[1]);
+                materials = read_mtl(tokens[1]);
             }
 
             if (tokens[0] == "usemtl") {
@@ -97,7 +102,7 @@ std::shared_ptr<collection> file_reader::read_scene(const std::string& filename)
     return scene;
 }
 
-materials_t file_reader::read_materials(const std::string& filename) {
+materials_t scene_reader::read_mtl(const std::string& filename) {
     std::cout << "[FileReader] reading mtl file: " << filename << std::endl;
     std::ifstream file(filename);
 
@@ -165,7 +170,6 @@ materials_t file_reader::read_materials(const std::string& filename) {
             }
 
             // @todo: implement also
-
             // Ns (specular_exponent)
             // Ni (refraction_index)
             // al (abledo)
