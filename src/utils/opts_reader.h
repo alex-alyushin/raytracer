@@ -10,9 +10,6 @@
 
 #include "camera.h"
 
-// @todo: use arrays double[3] instead of vec3, point3
-#include "vec3.h" // vec3, point3
-
 class opts_reader {
     public:
         static std::tuple<std::string, std::string, camera_opts> read(const std::string& filename);

@@ -37,7 +37,9 @@ int main(int argc, char* argv[]) {
     camera.initialize(camera_opts);
     auto matrix = camera.render(scene);
 
-    image::write_to_png(matrix, output_file);
+    image image{matrix};
+    image.post_processing();
+    image.store(output_file);
 
     return 0;
 }

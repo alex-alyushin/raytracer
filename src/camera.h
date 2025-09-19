@@ -16,10 +16,6 @@
 #include "hit_record.h"
 #include "interval.h"
 
-// @todo: [img] remove it
-// save intensities as is & post proccessing in image::proccess()
-#include "image.h"
-
 const auto BLACK = color3(0.0, 0.0, 0.0);
 const auto WHITE = color3(1.0, 1.0, 1.0);
 
@@ -90,8 +86,7 @@ class camera {
                         pixel += get_color(get_ray(i, j), scene, mode, max_depth);
                     }
 
-                    // @todo: [img] save raw intensity
-                    row.push_back(image::intensity_to_color(pixel_samples_scale * pixel));
+                    row.push_back(pixel * pixel_samples_scale);
                     logger.tick();
                 }
 
