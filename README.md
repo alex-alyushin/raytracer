@@ -2,7 +2,7 @@
 
 This is a simple realization of a [ray tracing algorithm](https://en.wikipedia.org/wiki/Ray_tracing_(graphics)).
 
-![balls.png](scenes/balls.png)
+![balls.png](scenes/cube.png)
 
 ### Build Renderer
 
