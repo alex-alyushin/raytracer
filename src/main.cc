@@ -2,17 +2,20 @@
 #include <string>
 #include <iostream>
 
-#include "image.h"
-#include "ray.h"
-#include "vec3.h"
-#include "hit_record.h"
-#include "material.h"
-#include "hittable.h"
-#include "collection.h"
-#include "sphere.h"
 #include "camera.h"
-#include "params.h"
-#include "file_reader.h"
+#include "image.h"
+#include "opts_reader.h"
+#include "scene_reader.h"
+
+std::pair<std::string, std::string> key_value(const std::string& token) {
+    auto pos = token.find('=');
+
+    if (pos != std::string::npos) {
+        return { token.substr(0, pos), token.substr(pos + 1) };
+    }
+
+    return {};
+}
 
 int main(int argc, char* argv[]) {
     std::cout << "[RayTracer v1.9.1] running..." << std::endl;
@@ -20,21 +23,23 @@ int main(int argc, char* argv[]) {
     std::string cfg = "";
 
     for (int index = 0; index < argc; index += 1) {
-        auto [ key, val ] = params::key_value(argv[index]);
+        auto [ key, val ] = key_value(argv[index]);
 
         if (key == "--cfg") {
             cfg = val;
         }
     }
 
-    auto [ camera_opts, render_opts ] = params::parse_cfg(cfg);
+    auto [ input_file, output_file, camera_opts ] = opts_reader::read(cfg);
+    auto scene = scene_reader::read(input_file);
 
     camera camera;
     camera.initialize(camera_opts);
+    auto matrix = camera.render(scene);
 
-    std::shared_ptr<collection> scene = file_reader::read_scene(render_opts.obj_file);
-    color3matrix matrix = camera.render(scene, render_opts.mode);
-    image::write_to_png(matrix, render_opts.output);
+    image image{matrix};
+    image.post_processing();
+    image.store(output_file);
 
     return 0;
 }

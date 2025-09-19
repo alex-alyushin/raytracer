@@ -6,32 +6,19 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <tuple>
 
-struct render_opts {
-    std::string obj_file;
-    std::string output;
-    std::string mode;
-};
+#include "camera.h"
 
-class params {
+class opts_reader {
     public:
-        static std::pair<std::string, std::string> key_value(const std::string& token);
-        static std::pair<camera_opts, render_opts> parse_cfg(const std::string& filename);
+        static std::tuple<std::string, std::string, camera_opts> read(const std::string& filename);
 };
 
-std::pair<std::string, std::string> params::key_value(const std::string& token) {
-    auto pos = token.find('=');
-
-    if (pos != std::string::npos) {
-        return { token.substr(0, pos), token.substr(pos + 1) };
-    }
-
-    return {};
-}
-
-std::pair<camera_opts, render_opts> params::parse_cfg(const std::string& filename) {
+std::tuple<std::string, std::string, camera_opts> opts_reader::read(const std::string& filename) {
+    std::string input_file;
+    std::string output_file;
     camera_opts camera_opts;
-    render_opts render_opts;
 
     std::ifstream file(filename);
     std::string line;
@@ -50,27 +37,25 @@ std::pair<camera_opts, render_opts> params::parse_cfg(const std::string& filenam
         std::string key = line.substr(0, pos);
         std::string val = line.substr(pos + 1);
 
+        /****************/
+        /* Input Output */
+        /****************/
 
-        /******************/
-        /* Render Options */
-        /******************/
-
-        if (key == "obj_file") {
-            render_opts.obj_file = val;
+        if (key == "input_file") {
+            input_file = val;
         }
 
-        else if (key == "output") {
-            render_opts.output = val;
+        else if (key == "output_file") {
+            output_file = val;
         }
-
-        else if (key == "mode") {
-            render_opts.mode = val;
-        }
-
 
         /******************/
         /* Camera Options */
         /******************/
+
+        else if (key == "mode") {
+            camera_opts.mode = val;
+        }
 
         else if (key == "aspect_ratio") {
             camera_opts.aspect_ratio = std::stod(val);
@@ -123,7 +108,7 @@ std::pair<camera_opts, render_opts> params::parse_cfg(const std::string& filenam
         }
     }
 
-    return { camera_opts, render_opts };
+    return { input_file, output_file, camera_opts };
 }
 
 #endif

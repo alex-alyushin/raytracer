@@ -3,6 +3,7 @@
 
 #include <algorithm>
 
+#include "ray.h"
 #include "random.h"
 #include "physics.h"
 

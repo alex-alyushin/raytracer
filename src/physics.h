@@ -2,6 +2,8 @@
 #define PHYSICS_H
 
 #include "vec3.h"
+#include "hit_record.h"
+#include "random.h"
 
 inline vec3 mirror_reflection(const vec3& direction, const hit_record& rec) {
     return unit_vector(direction - 2 * dot(direction, rec.normal) * rec.normal);
