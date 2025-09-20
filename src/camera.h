@@ -7,21 +7,8 @@
 #include <cmath>
 
 #include "ray.h"
-#include "collection.h"
+#include "scene.h"
 #include "logger.h"
-
-// @todo: [scene] move it to scene
-// used just for method get_color
-#include "material.h"
-#include "hit_record.h"
-#include "interval.h"
-
-const auto BLACK = color3(0.0, 0.0, 0.0);
-const auto WHITE = color3(1.0, 1.0, 1.0);
-
-const auto MODE_DEPT = "dept";
-const auto MODE_NORM = "norm";
-const auto MODE_FULL = "full";
 
 inline double degrees_to_radians(double degrees) {
     static const double pi = 3.141592653589793;
@@ -69,7 +56,7 @@ class camera {
             setup();
         }
 
-        color3matrix render(std::shared_ptr<collection> scene) {
+        color3matrix render(scene& scene) {
             color3matrix matrix;
 
             logger logger(image_width * image_height);
@@ -82,8 +69,7 @@ class camera {
                     color3 pixel = BLACK;
 
                     for (int s = 0; s < samples_per_pixel; s += 1) {
-                        // @todo: [scene] intensity must be calculated in class scene
-                        pixel += get_color(get_ray(i, j), scene, mode, max_depth);
+                        pixel += scene.illuminance(get_ray(i, j), mode, max_depth);
                     }
 
                     row.push_back(pixel * pixel_samples_scale);
@@ -141,12 +127,8 @@ class camera {
             defocus_disk_v = v * defocus_radius;
         }
 
-        vec3 sample_square() {
-            return 0.5 * random_in_unit_square();
-        }
-
         ray get_ray(int i, int j) {
-            vec3 randon_offset = sample_square();
+            vec3 randon_offset = 0.5 * random_in_unit_square();
 
             vec3 direction = pixel00_loc
                 + (i + randon_offset.x()) * pixel_delta_u
@@ -154,54 +136,6 @@ class camera {
                 - center;
 
             return ray(center, direction);
-        }
-
-        color3 get_sky(const ray& camera_ray) {
-            auto unit_direction = unit_vector(camera_ray.direction());
-            auto a = 0.5 * (unit_direction.y() + 1.0);
-
-            return (1.0 - a) * color3(1.0, 1.0, 1.0) + a * color3(0.5, 0.7, 1.0);
-        }
-
-        color3 get_color(const ray& camera_ray, std::shared_ptr<collection> scene, std::string mode, int depth) {
-            if (depth < 0) {
-                return get_sky(camera_ray);
-            }
-
-            hit_record rec;
-            interval interval(0.001);
-
-            if (scene->hit(camera_ray, interval, rec)) {
-
-                if (mode == MODE_DEPT) {
-                    double gray = std::exp(-rec.t);
-                    return color3(gray, gray, gray);
-                }
-
-                if (mode == MODE_NORM) {
-                    double R = (rec.normal.x() + 1.0) / 2;
-                    double G = (rec.normal.y() + 1.0) / 2;
-                    double B = (rec.normal.z() + 1.0) / 2;
-
-                    return color3(R, G, B);
-                }
-
-                if (mode == MODE_FULL) {
-                    ray scattered;
-                    color3 attenuation;
-
-                    if (rec.mat->scatter(camera_ray, rec, attenuation, scattered)) {
-                        return attenuation * get_color(scattered, scene, mode, depth - 1);
-                    }
-
-                    return BLACK;
-                }
-
-                std::cerr << "[Render] unknown render mode: " << mode << std::endl;
-                exit(1);
-            }
-
-            return get_sky(camera_ray);
         }
 };
 

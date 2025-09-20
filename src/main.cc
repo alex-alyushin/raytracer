@@ -31,7 +31,9 @@ int main(int argc, char* argv[]) {
     }
 
     auto [ input_file, output_file, camera_opts ] = opts_reader::read(cfg);
-    auto scene = scene_reader::read(input_file);
+
+    scene scene;
+    scene_reader::read(scene, input_file);
 
     camera camera;
     camera.initialize(camera_opts);

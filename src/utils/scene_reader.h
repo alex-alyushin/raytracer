@@ -6,20 +6,18 @@
 #include <sstream>
 #include <string>
 
-// @todo: [scene] drop this includes
-// instead use method scene.add_shpere()
-#include "material.h"
-#include "sphere.h"
+#include "scene.h"
 
 class scene_reader {
     public:
-        static std::shared_ptr<collection> read(const std::string& filename);
+        static void read(scene& scene, const std::string& filename);
     private:
-        static materials_t read_mtl(const std::string& filename);
+        static void read_materials(scene& scene, const std::string& filename);
 };
 
-std::shared_ptr<collection> scene_reader::read(const std::string& filename) {
+void scene_reader::read(scene& scene, const std::string& filename) {
     std::cout << "[FileReader] reading obj file: " << filename << std::endl;
+
     std::ifstream file(filename);
 
     if (!file.is_open()) {
@@ -27,11 +25,7 @@ std::shared_ptr<collection> scene_reader::read(const std::string& filename) {
         exit(1);
     }
 
-    auto scene = std::make_shared<collection>();
-
-    std::shared_ptr<material> current_material = nullptr;
-    materials_t materials;
-
+    std::string material_name;
     std::string line;
 
     while (std::getline(file, line)) {
@@ -52,7 +46,7 @@ std::shared_ptr<collection> scene_reader::read(const std::string& filename) {
                     continue;
                 }
 
-                materials = read_mtl(tokens[1]);
+                read_materials(scene, tokens[1]);
             }
 
             if (tokens[0] == "usemtl") {
@@ -60,24 +54,23 @@ std::shared_ptr<collection> scene_reader::read(const std::string& filename) {
                     continue;
                 }
 
-                current_material = materials[tokens[1]];
+                material_name = tokens[1];
             }
 
-            // Sphere
             if (tokens[0] == "S") {
                 if (tokens.size() != 5) {
                     continue;
                 }
 
-                scene->add(std::make_shared<sphere>(
+                scene.add_sphere(
                     point3(
                         std::stod(tokens[1]),   // x
                         std::stod(tokens[2]),   // y
                         std::stod(tokens[3])    // z
                     ),
                     std::stod(tokens[4]),       // radius
-                    current_material
-                ));
+                    material_name               // material
+                );
             }
 
             // Vertex
@@ -98,12 +91,11 @@ std::shared_ptr<collection> scene_reader::read(const std::string& filename) {
     }
 
     file.close();
-
-    return scene;
 }
 
-materials_t scene_reader::read_mtl(const std::string& filename) {
+void scene_reader::read_materials(scene& scene, const std::string& filename) {
     std::cout << "[FileReader] reading mtl file: " << filename << std::endl;
+
     std::ifstream file(filename);
 
     if (!file.is_open()) {
@@ -111,10 +103,8 @@ materials_t scene_reader::read_mtl(const std::string& filename) {
         exit(1);
     }
 
-    std::shared_ptr<mtl_model> current_model = nullptr;
-    mtl_models_t mtl_models;
-    materials_t materials;
-
+    std::string current_name;
+    std::unordered_map<std::string, std::shared_ptr<material_model>> material_models;
     std::string line;
 
     while (std::getline(file, line)) {
@@ -131,14 +121,13 @@ materials_t scene_reader::read_mtl(const std::string& filename) {
         if (!tokens.empty()) {
 
             if (tokens[0] == "newmtl") {
-                std::string name = tokens[1];
-                current_model = std::make_shared<mtl_model>();
-                current_model->name = name;
-                mtl_models[name] = current_model;
+                current_name = tokens[1];
+                material_models[current_name] = std::make_shared<material_model>();
+                material_models[current_name]->name = current_name;
             }
 
             if (tokens[0] == "Ka") {
-                current_model->ambient_color = color3(
+                material_models[current_name]->ambient_color = color3(
                     std::stod(tokens[1]),
                     std::stod(tokens[2]),
                     std::stod(tokens[3])
@@ -146,7 +135,7 @@ materials_t scene_reader::read_mtl(const std::string& filename) {
             }
 
             if (tokens[0] == "Kd") {
-                current_model->diffuse_color = color3(
+                material_models[current_name]->diffuse_color = color3(
                     std::stod(tokens[1]),
                     std::stod(tokens[2]),
                     std::stod(tokens[3])
@@ -154,7 +143,7 @@ materials_t scene_reader::read_mtl(const std::string& filename) {
             }
 
             if (tokens[0] == "Ks") {
-                current_model->specular_color = color3(
+                material_models[current_name]->specular_color = color3(
                     std::stod(tokens[1]),
                     std::stod(tokens[2]),
                     std::stod(tokens[3])
@@ -162,7 +151,7 @@ materials_t scene_reader::read_mtl(const std::string& filename) {
             }
 
             if (tokens[0] == "Ke") {
-                current_model->intensity = color3(
+                material_models[current_name]->intensity = color3(
                     std::stod(tokens[1]),
                     std::stod(tokens[2]),
                     std::stod(tokens[3])
@@ -178,38 +167,9 @@ materials_t scene_reader::read_mtl(const std::string& filename) {
 
     file.close();
 
-    for (auto& [ name, model ] : mtl_models) {
-        std::shared_ptr<material> mat;
-
-        /* Lambertian */
-        if (model->diffuse_color.length_squared() > 0.001) {
-            mat = std::make_shared<lambertian>(
-                model->diffuse_color
-            );
-        }
-
-        /* Metal */
-        else if (model->specular_color.length_squared() > 0.001) {
-            mat = std::make_shared<metal>(
-                model->specular_color,
-                0.0
-            );
-            // mat = std::make_shared<dielectric>(
-            //     1.3333
-            // );
-        }
-
-        /* Dielectric */
-        else if (false/* Tr > 0 && Ni > 0 */) {
-        }
-
-        else {
-        }
-
-        materials[name] = mat;
+    for (auto& [ name, model ] : material_models) {
+        scene.add_material(model, name);
     }
-
-    return materials;
 }
 
 #endif
