@@ -66,7 +66,7 @@ class camera {
                 std::vector<color3> row;
 
                 for (int i = 0; i < image_width; i += 1) {
-                    color3 pixel = BLACK;
+                    color3 pixel = color3(0.0, 0.0, 0.0);
 
                     for (int s = 0; s < samples_per_pixel; s += 1) {
                         pixel += scene.illuminance(get_ray(i, j), mode, max_depth);

@@ -10,12 +10,12 @@
 
 #include "camera.h"
 
-class opts_reader {
+class params_reader {
     public:
         static std::tuple<std::string, std::string, camera_opts> read(const std::string& filename);
 };
 
-std::tuple<std::string, std::string, camera_opts> opts_reader::read(const std::string& filename) {
+std::tuple<std::string, std::string, camera_opts> params_reader::read(const std::string& filename) {
     std::string input_file;
     std::string output_file;
     camera_opts camera_opts;

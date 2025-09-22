@@ -34,7 +34,7 @@ class sphere : public hittable {
                 }
             }
 
-            hit_record rec;
+            hit_record  rec;
             rec.t       = root;
             rec.point   = ray.at(rec.t);
             rec.mat     = mat;
