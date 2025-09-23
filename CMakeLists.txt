@@ -7,8 +7,14 @@ set ( CMAKE_CXX_STANDARD_REQUIRED ON )
 set ( CMAKE_CXX_EXTENSIONS        OFF )
 set ( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0" )
 
+file(GLOB SOURCES "src/*.cpp")
+
 set ( EXTERNAL )
-set ( SOURCE_RAY_TRACER src/main.cc )
+set (
+    SOURCE_RAY_TRACER
+    src/main.cc
+    ${SOURCES}
+)
 
 message (STATUS "Compiler ID: " ${CMAKE_CXX_COMPILER_ID})
 message (STATUS "Release flags: " ${CMAKE_CXX_FLAGS_RELEASE})

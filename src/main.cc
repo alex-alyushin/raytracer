@@ -4,7 +4,7 @@
 
 #include "camera.h"
 #include "image.h"
-#include "opts_reader.h"
+#include "params_reader.h"
 #include "scene_reader.h"
 
 std::pair<std::string, std::string> key_value(const std::string& token) {
@@ -18,7 +18,7 @@ std::pair<std::string, std::string> key_value(const std::string& token) {
 }
 
 int main(int argc, char* argv[]) {
-    std::cout << "[RayTracer v1.9.1] running..." << std::endl;
+    std::cout << "[RayTracer v2.0.0] running..." << std::endl;
 
     std::string cfg = "";
 
@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    auto [ input_file, output_file, camera_opts ] = opts_reader::read(cfg);
+    auto [ input_file, output_file, camera_opts ] = params_reader::read(cfg);
 
     scene scene;
     scene_reader::read(scene, input_file);

@@ -31,6 +31,11 @@ inline double gamma_correction(double linear) {
 }
 
 void image::post_processing() {
+    // @debug
+    double max_r = 0.0;
+    double max_g = 0.0;
+    double max_b = 0.0;
+
     for (int i = 0; i < matrix.size(); i += 1) {
         for (int j = 0; j < matrix[0].size(); j += 1) {
             color3 color = matrix[i][j];
@@ -43,6 +48,10 @@ void image::post_processing() {
             G = gamma_correction(G);
             B = gamma_correction(B);
 
+            if (R > max_r) { max_r = R; }
+            if (G > max_g) { max_g = G; }
+            if (B > max_b) { max_b = B; }
+
             auto rByte = int(256 * std::min(0.999, R));
             auto gByte = int(256 * std::min(0.999, G));
             auto bByte = int(256 * std::min(0.999, B));
@@ -50,6 +59,12 @@ void image::post_processing() {
             matrix[i][j] = color3(rByte, gByte, bByte);
         }
     }
+
+    // @debug
+    std::cout
+        << max_r << "\t"
+        << max_g << "\t"
+        << max_b << "\n";
 }
 
 void image::store(const std::string& output_file) {

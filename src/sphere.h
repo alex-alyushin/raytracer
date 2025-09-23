@@ -5,10 +5,10 @@
 
 class sphere : public hittable {
     public:
-        sphere(const point3& center, double radius, std::shared_ptr<material> mat)
+        sphere(const point3& center, double radius, std::shared_ptr<material_model> model)
             : center(center)
             , radius(radius)
-            , mat(mat) {}
+            , mat(model) {}
 
         std::optional<hit_record> hit(const ray& ray, const interval& interval) const override {
             auto OC = center - ray.origin();
@@ -34,7 +34,7 @@ class sphere : public hittable {
                 }
             }
 
-            hit_record rec;
+            hit_record  rec;
             rec.t       = root;
             rec.point   = ray.at(rec.t);
             rec.mat     = mat;
@@ -48,7 +48,7 @@ class sphere : public hittable {
     private:
         point3 center;
         double radius;
-        std::shared_ptr<material> mat;
+        std::shared_ptr<material_model> mat;
 };
 
 #endif

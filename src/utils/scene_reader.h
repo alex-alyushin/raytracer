@@ -69,7 +69,31 @@ void scene_reader::read(scene& scene, const std::string& filename) {
                         std::stod(tokens[3])    // z
                     ),
                     std::stod(tokens[4]),       // radius
-                    material_name               // material
+                    material_name               // name
+                );
+            }
+
+            if (tokens[0] == "P") {
+                if (tokens.size() != 7) {
+                    continue;
+                }
+
+                for (auto t : tokens) {
+                    std::cout << t << "\t";
+                }
+                std::cout << "\n";
+
+                scene.add_lamp(
+                    point3(
+                        std::stod(tokens[1]),   // x
+                        std::stod(tokens[2]),   // y
+                        std::stod(tokens[3])    // z
+                    ),
+                    color3(
+                        std::stod(tokens[4]),   // R
+                        std::stod(tokens[5]),   // G
+                        std::stod(tokens[6])    // B
+                    )
                 );
             }
 
@@ -84,9 +108,6 @@ void scene_reader::read(scene& scene, const std::string& filename) {
 
             // Face
             if (tokens[0] == "f") {}
-
-            // Lighter
-            if (tokens[0] == "P") {}
         }
     }
 
@@ -103,7 +124,7 @@ void scene_reader::read_materials(scene& scene, const std::string& filename) {
         exit(1);
     }
 
-    std::string current_name;
+    std::string model_name;
     std::unordered_map<std::string, std::shared_ptr<material_model>> material_models;
     std::string line;
 
@@ -121,29 +142,13 @@ void scene_reader::read_materials(scene& scene, const std::string& filename) {
         if (!tokens.empty()) {
 
             if (tokens[0] == "newmtl") {
-                current_name = tokens[1];
-                material_models[current_name] = std::make_shared<material_model>();
-                material_models[current_name]->name = current_name;
+                model_name = tokens[1];
+                material_models[model_name] = std::make_shared<material_model>();
+                material_models[model_name]->name = model_name;
             }
 
             if (tokens[0] == "Ka") {
-                material_models[current_name]->ambient_color = color3(
-                    std::stod(tokens[1]),
-                    std::stod(tokens[2]),
-                    std::stod(tokens[3])
-                );
-            }
-
-            if (tokens[0] == "Kd") {
-                material_models[current_name]->diffuse_color = color3(
-                    std::stod(tokens[1]),
-                    std::stod(tokens[2]),
-                    std::stod(tokens[3])
-                );
-            }
-
-            if (tokens[0] == "Ks") {
-                material_models[current_name]->specular_color = color3(
+                material_models[model_name]->ambient_color = color3(
                     std::stod(tokens[1]),
                     std::stod(tokens[2]),
                     std::stod(tokens[3])
@@ -151,15 +156,35 @@ void scene_reader::read_materials(scene& scene, const std::string& filename) {
             }
 
             if (tokens[0] == "Ke") {
-                material_models[current_name]->intensity = color3(
+                material_models[model_name]->intensity = color3(
                     std::stod(tokens[1]),
                     std::stod(tokens[2]),
                     std::stod(tokens[3])
                 );
             }
 
+            if (tokens[0] == "Kd") {
+                material_models[model_name]->diffuse_color = color3(
+                    std::stod(tokens[1]),
+                    std::stod(tokens[2]),
+                    std::stod(tokens[3])
+                );
+            }
+
+            if (tokens[0] == "Ks") {
+                material_models[model_name]->specular_color = color3(
+                    std::stod(tokens[1]),
+                    std::stod(tokens[2]),
+                    std::stod(tokens[3])
+                );
+            }
+
+            if (tokens[0] == "Ns") {
+                material_models[model_name]->specular_exponent =
+                    std::stod(tokens[1]);
+            }
+
             // @todo: implement also
-            // Ns (specular_exponent)
             // Ni (refraction_index)
             // al (abledo)
         }
@@ -168,7 +193,7 @@ void scene_reader::read_materials(scene& scene, const std::string& filename) {
     file.close();
 
     for (auto& [ name, model ] : material_models) {
-        scene.add_material(model, name);
+        scene.add_material_model(model);
     }
 }
 
