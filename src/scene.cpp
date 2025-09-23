@@ -1,17 +1,34 @@
 #include "scene.h"
 
 const auto BLACK = color3(0.0, 0.0, 0.0);
+const auto WHITE = color3(1.0, 1.0, 1.0);
 
 scene::scene() {}
 
-void scene::add_sphere(const point3& center, double radius, const std::string& material_name) {
-    objects.push_back(std::make_shared<sphere>(
-        center,
-        radius,
-        materials[material_name]
-    ));
+void scene::add_lamp(const point3& position, const color3& intensity) {
+    lamps.push_back(
+        std::make_shared<lamp>(
+            position,
+            intensity
+        )
+    );
 }
 
+void scene::add_sphere(const point3& center, double radius, const std::string& name) {
+    objects.push_back(
+        std::make_shared<sphere>(
+            center,
+            radius,
+            materials[name]
+        )
+    );
+}
+
+void scene::add_material_model(std::shared_ptr<material_model> model) {
+    materials[model->name] = model;
+}
+
+/*
 void scene::add_material(std::shared_ptr<material_model> model, const std::string& material_name) {
     if (model->diffuse_color.length_squared() > 0.001) {
         materials[material_name] = std::make_shared<lambertian>(
@@ -26,13 +43,89 @@ void scene::add_material(std::shared_ptr<material_model> model, const std::strin
         );
     }
 
-    else if (false/* Tr > 0 && Ni > 0 */) {
+    else if ( Tr > 0 && Ni > 0) {
         // materials[material_name] = std::make_shared<dielectric>(
         //     1.3333
         // );
     }
 }
+*/
 
+color3 scene::illuminance_v2(const ray& camera_ray, int depth) {
+    if (depth < 0) {
+        return BLACK;
+    }
+
+    color3 illum = color3(0.0, 0.0, 0.0);
+
+    // Hit scene
+
+    std::optional<hit_record> rec = hit_scene(camera_ray, interval{ 0.001 });
+
+    if (!rec.has_value()) {
+        return get_sky(camera_ray);
+    }
+
+    hit_record rec_value = rec.value();
+    auto point = rec_value.point;
+
+    auto specular_exponent  = rec_value.mat->specular_exponent;
+    auto specular_color     = rec_value.mat->specular_color;
+    auto diffuse_color      = rec_value.mat->diffuse_color;
+
+    // Recursion
+
+    auto specular_reflected = mirror_reflection(camera_ray.direction(), rec_value);
+
+    if (specular_color.length_squared() > 0.001) {
+        illum += 0.333 * specular_color * illuminance_v2(ray(point, specular_reflected), depth - 1);
+    }
+
+    // Main cycle by lamps
+
+    for (auto lamp : lamps) {
+        auto lamp_intensity = lamp->intensity;
+        auto lamp_vec = lamp->position - point;
+        auto lamp_ray = ray(point, lamp_vec);
+
+        auto attenuation = [](double r) {
+            return 1.0 / (1.0 + 0.22 * r + 0.20 * r * r);
+        };
+
+        std::optional<hit_record> shadow = hit_scene(lamp_ray, interval{ 0.001, lamp_vec.length() });
+
+        if (shadow.has_value()) {
+            continue;
+        }
+
+        if (specular_color.length_squared() > 0.001) {
+            illum += attenuation(lamp_vec.length())
+                * lamp_intensity
+                * specular_color
+                * std::pow(
+                    std::max(
+                        0.0,
+                        dot(unit_vector(lamp_vec), specular_reflected)
+                    ),
+                    specular_exponent
+                );
+        }
+
+        if (diffuse_color.length_squared() > 0.001) {
+            illum += attenuation(lamp_vec.length())
+                * lamp_intensity
+                * diffuse_color
+                * std::max(
+                    0.0,
+                    dot(unit_vector(lamp_vec), rec_value.normal)
+                );
+        }
+    }
+
+    return illum;
+}
+
+/*
 color3 scene::illuminance(const ray& camera_ray, std::string mode, int depth) {
     if (depth < 0) {
         return get_sky(camera_ray);
@@ -72,18 +165,18 @@ color3 scene::illuminance(const ray& camera_ray, std::string mode, int depth) {
     std::cerr << "[Render] unknown render mode: " << mode << std::endl;
     exit(1);
 }
+*/
 
 std::optional<hit_record> scene::hit_scene(const ray& ray, const interval& interval) {
     std::optional<hit_record> rec = std::nullopt;
 
-    for (const auto& object : objects) {
+    for (auto object : objects) {
         auto new_record = object->hit(ray, interval);
 
         if (new_record.has_value()) {
-            if (
-                !rec.has_value()
-                || rec.value().t > new_record.value().t
-            ) { rec = new_record; }
+            if (!rec.has_value() || new_record.value().t < rec.value().t) {
+                rec = new_record;
+            }
         }
     }
 

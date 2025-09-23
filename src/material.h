@@ -1,21 +1,20 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include <algorithm>
-
 #include "ray.h"
 #include "random.h"
 #include "physics.h"
 
-struct material_model {
-    std::string name;
-    color3 ambient_color        = color3(0, 0, 0);
-    color3 diffuse_color        = color3(0, 0, 0);
-    color3 specular_color       = color3(0, 0, 0);
-    color3 intensity            = color3(0, 0, 0);
-    color3 albedo               = color3(1, 0, 0);
-    double specular_exponent;
-    double refraction_index;
+class material_model {
+	public:
+		std::string name;
+		color3 ambient_color        = color3(0, 0, 0);
+		color3 diffuse_color        = color3(0, 0, 0);
+		color3 specular_color       = color3(0, 0, 0);
+		color3 intensity            = color3(0, 0, 0);
+		color3 albedo               = color3(1, 0, 0);
+		double specular_exponent;
+		double refraction_index;
 };
 
 /*

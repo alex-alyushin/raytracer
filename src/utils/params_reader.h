@@ -1,5 +1,5 @@
-#ifndef PARAMS_H
-#define PARAMS_H
+#ifndef PARAMS_READER_H
+#define PARAMS_READER_H
 
 #include <vector>
 #include <string>

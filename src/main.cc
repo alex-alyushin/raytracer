@@ -18,7 +18,7 @@ std::pair<std::string, std::string> key_value(const std::string& token) {
 }
 
 int main(int argc, char* argv[]) {
-    std::cout << "[RayTracer v1.9.1] running..." << std::endl;
+    std::cout << "[RayTracer v2.0.0] running..." << std::endl;
 
     std::string cfg = "";
 

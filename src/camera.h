@@ -69,7 +69,7 @@ class camera {
                     color3 pixel = color3(0.0, 0.0, 0.0);
 
                     for (int s = 0; s < samples_per_pixel; s += 1) {
-                        pixel += scene.illuminance(get_ray(i, j), mode, max_depth);
+                        pixel += scene.illuminance_v2(get_ray(i, j), max_depth);
                     }
 
                     row.push_back(pixel * pixel_samples_scale);

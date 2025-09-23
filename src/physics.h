@@ -14,6 +14,7 @@ inline vec3 diffuse_reflection(const hit_record& rec) {
 }
 
 inline vec3 refraction(const vec3& direction, const hit_record& rec, double refraction_index) {
+    // @todo: return unit vector
     double etai = rec.front_face ? (1 / refraction_index) : refraction_index;
 
     auto unit_direct = unit_vector(direction);
