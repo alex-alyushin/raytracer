@@ -156,7 +156,7 @@ void scene_reader::read_materials(scene& scene, const std::string& filename) {
             }
 
             if (tokens[0] == "Ke") {
-                material_models[model_name]->intensity = color3(
+                material_models[model_name]->ambient_color_e = color3(
                     std::stod(tokens[1]),
                     std::stod(tokens[2]),
                     std::stod(tokens[3])
