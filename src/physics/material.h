@@ -1,7 +1,7 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-class material_model {
+class material {
     public:
         std::string name;
         color3 ambient_color        = color3(0, 0, 0);

@@ -1,6 +1,6 @@
 # Two metal balls scene
 
-mtllib scenes/balls.mtl
+mtllib examples/balls.mtl
 
 # Ground
 usemtl ground

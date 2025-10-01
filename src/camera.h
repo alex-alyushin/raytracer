@@ -10,11 +10,6 @@
 #include "scene.h"
 #include "logger.h"
 
-inline double degrees_to_radians(double degrees) {
-    static const double pi = 3.141592653589793;
-    return degrees * pi / 180.0;
-}
-
 struct camera_opts {
     std::string mode;
     double      aspect_ratio;
@@ -24,7 +19,7 @@ struct camera_opts {
     double      vfov;
     point3      lookfrom;
     point3      lookat;
-    vec3        vup;
+    vec         vup;
 };
 
 class camera {
@@ -37,7 +32,7 @@ class camera {
         double      vfov                = 90;
         point3      lookfrom            = point3(0, 0, 0);      // Point camera is looking from
         point3      lookat              = point3(0, 0, -1);     // Point camera is looking at
-        vec3        vup                 = vec3(0, 1, 0);        // Camera "up" direction
+        vec         vup                 = vec(0, 1, 0);        // Camera "up" direction
 
         double      defocus_angle       = 0;
         double      focus_dist          = 10;
@@ -90,11 +85,11 @@ class camera {
         double  pixel_samples_scale;
         point3  center;
         point3  pixel00_loc;
-        vec3    pixel_delta_u;
-        vec3    pixel_delta_v;
-        vec3    u, v, w;
-        vec3    defocus_disk_u;
-        vec3    defocus_disk_v;
+        vec     pixel_delta_u;
+        vec     pixel_delta_v;
+        vec     u, v, w;
+        vec     defocus_disk_u;
+        vec     defocus_disk_v;
 
         void setup() {
             image_height = int(image_width / aspect_ratio);
@@ -114,8 +109,8 @@ class camera {
             auto viewport_height = 2 * H * focus_dist;
             auto viewport_width = viewport_height * (double(image_width) / image_height);
 
-            vec3 viewport_u = viewport_width * u;
-            vec3 viewport_v = viewport_height * -v;
+            vec viewport_u = viewport_width * u;
+            vec viewport_v = viewport_height * -v;
 
             pixel_delta_u = viewport_u / image_width;
             pixel_delta_v = viewport_v / image_height;
@@ -129,9 +124,9 @@ class camera {
         }
 
         ray get_ray(int i, int j) {
-            vec3 randon_offset = 0.5 * random_in_unit_square();
+            vec randon_offset = 0.5 * random_in_unit_square();
 
-            vec3 direction = pixel00_loc
+            vec direction = pixel00_loc
                 + (i + randon_offset.x()) * pixel_delta_u
                 + (j + randon_offset.y()) * pixel_delta_v
                 - center;

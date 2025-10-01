@@ -1,5 +1,5 @@
-#ifndef PARAMS_READER_H
-#define PARAMS_READER_H
+#ifndef PARAMS_H
+#define PARAMS_H
 
 #include <vector>
 #include <string>
@@ -10,12 +10,12 @@
 
 #include "camera.h"
 
-class params_reader {
+class params {
     public:
         static std::tuple<std::string, std::string, camera_opts> read(const std::string& filename);
 };
 
-std::tuple<std::string, std::string, camera_opts> params_reader::read(const std::string& filename) {
+std::tuple<std::string, std::string, camera_opts> params::read(const std::string& filename) {
     std::string input_file;
     std::string output_file;
     camera_opts camera_opts;
@@ -89,7 +89,7 @@ std::tuple<std::string, std::string, camera_opts> params_reader::read(const std:
             }
 
             if (key == "vup") {
-                camera_opts.vup = vec3(x, y, z);
+                camera_opts.vup = vec(x, y, z);
             }
         }
     }

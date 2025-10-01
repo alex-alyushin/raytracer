@@ -1,5 +1,5 @@
-#ifndef FILE_READER_H
-#define FILE_READER_H
+#ifndef PARSER_H
+#define PARSER_H
 
 #include <iostream>
 #include <fstream>
@@ -8,14 +8,14 @@
 
 #include "scene.h"
 
-class scene_reader {
+class parser {
     public:
-        static void read(scene& scene, const std::string& filename);
+        static void read_objects(scene& scene, const std::string& filename);
     private:
         static void read_materials(scene& scene, const std::string& filename);
 };
 
-void scene_reader::read(scene& scene, const std::string& filename) {
+void parser::read_objects(scene& scene, const std::string& filename) {
     std::cout << "[FileReader] reading obj file: " << filename << std::endl;
 
     std::ifstream file(filename);
@@ -73,17 +73,13 @@ void scene_reader::read(scene& scene, const std::string& filename) {
                 );
             }
 
+            // Point Light
             if (tokens[0] == "P") {
                 if (tokens.size() != 7) {
                     continue;
                 }
 
-                for (auto t : tokens) {
-                    std::cout << t << "\t";
-                }
-                std::cout << "\n";
-
-                scene.add_lamp(
+                scene.add_light(
                     point3(
                         std::stod(tokens[1]),   // x
                         std::stod(tokens[2]),   // y
@@ -97,6 +93,9 @@ void scene_reader::read(scene& scene, const std::string& filename) {
                 );
             }
 
+            // Area Light (non-standard)
+           if (tokens[0] == "A") {}
+
             // Vertex
             if (tokens[0] == "v") {}
 
@@ -108,13 +107,14 @@ void scene_reader::read(scene& scene, const std::string& filename) {
 
             // Face
             if (tokens[0] == "f") {}
+
         }
     }
 
     file.close();
 }
 
-void scene_reader::read_materials(scene& scene, const std::string& filename) {
+void parser::read_materials(scene& scene, const std::string& filename) {
     std::cout << "[FileReader] reading mtl file: " << filename << std::endl;
 
     std::ifstream file(filename);
@@ -125,7 +125,7 @@ void scene_reader::read_materials(scene& scene, const std::string& filename) {
     }
 
     std::string model_name;
-    std::unordered_map<std::string, std::shared_ptr<material_model>> material_models;
+    std::unordered_map<std::string, std::shared_ptr<material>> material_models;
     std::string line;
 
     while (std::getline(file, line)) {
@@ -143,7 +143,7 @@ void scene_reader::read_materials(scene& scene, const std::string& filename) {
 
             if (tokens[0] == "newmtl") {
                 model_name = tokens[1];
-                material_models[model_name] = std::make_shared<material_model>();
+                material_models[model_name] = std::make_shared<material>();
                 material_models[model_name]->name = model_name;
             }
 
@@ -193,7 +193,7 @@ void scene_reader::read_materials(scene& scene, const std::string& filename) {
     file.close();
 
     for (auto& [ name, model ] : material_models) {
-        scene.add_material_model(model);
+        scene.add_material(model);
     }
 }
 

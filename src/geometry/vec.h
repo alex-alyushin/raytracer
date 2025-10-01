@@ -1,18 +1,18 @@
-#ifndef VEC3_H
-#define VEC3_H
+#ifndef VEC_H
+#define VEC_H
 
 #include <cmath>
 #include <iostream>
 
-#include "random.h"
+#include "utils.h"
 
-class vec3 {
+class vec {
     public:
         double e[3];
 
-        vec3() : vec3(0, 0, 0) {}
+        vec() : vec(0, 0, 0) {}
 
-        vec3(double e0, double e1, double e2) : e{ e0, e1, e2 } {}
+        vec(double e0, double e1, double e2) : e{ e0, e1, e2 } {}
 
         double x() const { return e[0]; }
         double y() const { return e[1]; }
@@ -21,11 +21,11 @@ class vec3 {
         double operator[](int i) const { return e[i]; }
         double& operator[](int i) { return e[i]; }
 
-        vec3 operator-() const {
-            return vec3(-x(), -y(), -z());
+        vec operator-() const {
+            return vec(-x(), -y(), -z());
         }
 
-        vec3& operator+=(const vec3& v) {
+        vec& operator+=(const vec& v) {
             e[0] += v[0];
             e[1] += v[1];
             e[2] += v[2];
@@ -33,7 +33,7 @@ class vec3 {
             return *this;
         }
 
-        vec3& operator*=(double t) {
+        vec& operator*=(double t) {
             e[0] *= t;
             e[1] *= t;
             e[2] *= t;
@@ -41,7 +41,7 @@ class vec3 {
             return *this;
         }
 
-        vec3& operator/=(double t) {
+        vec& operator/=(double t) {
             return *this *= 1 / t;
         }
 
@@ -61,8 +61,8 @@ class vec3 {
                 && (std::fabs(e[2]) < delta);
         }
 
-        static vec3 random(double min, double max) {
-            return vec3(
+        static vec random(double min, double max) {
+            return vec(
                 random_double(min, max),
                 random_double(min, max),
                 random_double(min, max)
@@ -74,59 +74,59 @@ class vec3 {
 /* Aliases */
 /***********/
 
-using point3        = vec3;
-using color3        = vec3;
+using point3        = vec;
+using color3        = vec;
 using color3matrix  = std::vector<std::vector<color3>>;
 
 /********************/
 /* Binary operators */
 /********************/
 
-inline std::ostream& operator<<(std::ostream& out, const vec3& v) {
+inline std::ostream& operator<<(std::ostream& out, const vec& v) {
     return out << v.x() << " " << v.y() << " " << v.z();
 }
 
-inline vec3 operator+(const vec3& u, const vec3& v) {
-    return vec3(
+inline vec operator+(const vec& u, const vec& v) {
+    return vec(
         u.x() + v.x(),
         u.y() + v.y(),
         u.z() + v.z()
     );
 }
 
-inline vec3 operator-(const vec3& u, const vec3& v) {
-    return vec3(
+inline vec operator-(const vec& u, const vec& v) {
+    return vec(
         u.x() - v.x(),
         u.y() - v.y(),
         u.z() - v.z()
     );
 }
 
-inline vec3 operator*(const vec3& u, const vec3& v) {
-    return vec3(
+inline vec operator*(const vec& u, const vec& v) {
+    return vec(
         u.x() * v.x(),
         u.y() * v.y(),
         u.z() * v.z()
     );
 }
 
-inline vec3 operator*(double t, const vec3& v) {
-    return vec3(t * v.x(), t * v.y(), t * v.z());
+inline vec operator*(double t, const vec& v) {
+    return vec(t * v.x(), t * v.y(), t * v.z());
 }
 
-inline vec3 operator*(const vec3& v, double t) {
+inline vec operator*(const vec& v, double t) {
     return t * v;
 }
 
-inline vec3 operator/(const vec3& v, double t) {
+inline vec operator/(const vec& v, double t) {
     return (1 / t) * v;
 }
 
-inline vec3 unit_vector(const vec3& v) {
+inline vec unit_vector(const vec& v) {
     return v / v.length();
 }
 
-inline double dot(const vec3& v, const vec3& u) {
+inline double dot(const vec& v, const vec& u) {
     return (
         v.x() * u.x() +
         v.y() * u.y() +
@@ -134,8 +134,8 @@ inline double dot(const vec3& v, const vec3& u) {
     );
 }
 
-inline vec3 cross(const vec3& v, const vec3& u) {
-    return vec3(
+inline vec cross(const vec& v, const vec& u) {
+    return vec(
         v.y() * u.z() - v.z() * u.y(),
         v.z() * u.x() - v.x() * u.z(),
         v.x() * u.y() - v.y() * u.x()
@@ -146,15 +146,15 @@ inline vec3 cross(const vec3& v, const vec3& u) {
 /* Random vectors */
 /******************/
 
-inline vec3 random_in_unit_square() {
-    return vec3(
+inline vec random_in_unit_square() {
+    return vec(
         random_double(-1, 1),
         random_double(-1, 1),
         0
     );
 }
 
-inline vec3 random_in_unit_disk() {
+inline vec random_in_unit_disk() {
     while (true) {
         auto p = random_in_unit_square();
 
@@ -163,9 +163,9 @@ inline vec3 random_in_unit_disk() {
     }
 }
 
-inline vec3 random_unit_vector() {
+inline vec random_unit_vector() {
     while (true) {
-        auto p = vec3::random(-1, +1);
+        auto p = vec::random(-1, +1);
         auto lensq = p.length_squared();
 
         if (1e-160 < lensq && lensq <= 1.0)
@@ -173,8 +173,8 @@ inline vec3 random_unit_vector() {
     }
 }
 
-inline vec3 random_on_hemisphere(const vec3& normal) {
-    vec3 on_unit_sphere = random_unit_vector();
+inline vec random_on_hemisphere(const vec& normal) {
+    vec on_unit_sphere = random_unit_vector();
 
     if (dot(on_unit_sphere, normal) > 0.0) {
         return on_unit_sphere;

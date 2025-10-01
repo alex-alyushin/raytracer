@@ -1,45 +1,45 @@
-#ifndef HIT_RECORD_H
-#define HIT_RECORD_H
+#ifndef INTERSECTION_H
+#define INTERSECTION_H
 
-class material_model;
+class material;
 class object;
 
-struct hit_record {
+struct intersection {
     point3 point;
-    vec3 normal;
+    vec normal;
     double t;
-    std::shared_ptr<material_model> mat;
+    std::shared_ptr<material> mat;
 
     bool front_face;
-    inline void set_front_face(const ray& ray, const vec3& outward_normal);
-    inline void set_normal(const vec3& outward_normal);
+    inline void set_front_face(const ray& ray, const vec& outward_normal);
+    inline void set_normal(const vec& outward_normal);
 
     inline ray get_specular_reflected(const ray& ray_in);
     inline ray get_diffuse_reflected();
 };
 
-inline void hit_record::set_front_face(const ray& ray, const vec3& outward_normal) {
+inline void intersection::set_front_face(const ray& ray, const vec& outward_normal) {
     front_face = dot(ray.direction(), outward_normal) < 0;
 }
 
-inline void hit_record::set_normal(const vec3& outward_normal) {
+inline void intersection::set_normal(const vec& outward_normal) {
     normal = front_face ? outward_normal : -outward_normal;
 }
 
-inline ray hit_record::get_specular_reflected(const ray& ray_in) {
+inline ray intersection::get_specular_reflected(const ray& ray_in) {
     auto reflected = ray_in.direction()
         - 2 * dot(ray_in.direction(), normal) * normal;
 
     return ray(point, unit_vector(reflected));
 }
 
-inline ray hit_record::get_diffuse_reflected() {
+inline ray intersection::get_diffuse_reflected() {
     auto reflected = unit_vector(normal) + random_unit_vector();
 
     return ray(point, unit_vector(reflected));
 }
 
-// inline vec3 refraction(const vec3& direction, const hit_record& rec, double refraction_index) {
+// inline vec refraction(const vec& direction, const intersection& rec, double refraction_index) {
 //     double etai = rec.front_face ? (1 / refraction_index) : refraction_index;
 
 //     auto unit_direct = unit_vector(direction);

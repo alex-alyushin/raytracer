@@ -2,7 +2,7 @@
 
 This is a simple realization of a [ray tracing algorithm](https://en.wikipedia.org/wiki/Ray_tracing_(graphics)).
 
-![balls.png](scenes/cube.png)
+![balls.png](examples/cube.png)
 
 ### Build Renderer
 
@@ -14,5 +14,5 @@ $ cmake --build build
 ### Usage
 
 ```bash
-$ ./build/rt --cfg=scenes/balls.cfg
+$ ./build/rt --cfg=examples/balls.cfg
 ```

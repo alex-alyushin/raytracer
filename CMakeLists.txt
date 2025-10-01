@@ -51,7 +51,10 @@ FetchContent_MakeAvailable(stb)
 
 target_include_directories(rt PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/geometry
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/scene
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tech
     ${stb_SOURCE_DIR}
 )
 

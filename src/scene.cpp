@@ -5,9 +5,9 @@ const auto WHITE = color3(1.0, 1.0, 1.0);
 
 scene::scene() {}
 
-void scene::add_lamp(const point3& position, const color3& intensity) {
-    lamps.push_back(
-        std::make_shared<lamp>(
+void scene::add_light(const point3& position, const color3& intensity) {
+    lights.push_back(
+        std::make_shared<light>(
             position,
             intensity
         )
@@ -24,7 +24,7 @@ void scene::add_sphere(const point3& center, double radius, const std::string& n
     );
 }
 
-void scene::add_material_model(std::shared_ptr<material_model> model) {
+void scene::add_material(std::shared_ptr<material> model) {
     materials[model->name] = model;
 }
 
@@ -35,13 +35,13 @@ color3 scene::illuminance_v2(const ray& camera_ray, int depth) {
         return illum;
     }
 
-    std::optional<hit_record> rec = hit_scene(camera_ray, interval{ 0.001 });
+    std::optional<intersection> rec = hit(camera_ray, interval{ 0.001 });
 
     if (!rec.has_value()) {
         return illum;
     }
 
-    hit_record rec_value    = rec.value();
+    intersection rec_value    = rec.value();
 
     auto point              = rec_value.point;
     auto ambient_color      = rec_value.mat->ambient_color;
@@ -54,15 +54,15 @@ color3 scene::illuminance_v2(const ray& camera_ray, int depth) {
         illum += 0.333 * specular_color * illuminance_v2(rec_value.get_specular_reflected(camera_ray), depth - 1);
     }
 
-    for (auto lamp : lamps) {
-        auto lamp_intensity = lamp->intensity;
-        auto lamp_vec = lamp->position - point;
+    for (auto light : lights) {
+        auto lamp_intensity = light->intensity;
+        auto lamp_vec = light->position - point;
         auto lamp_ray = ray(point, unit_vector(lamp_vec));
 
         auto R = lamp_vec.length();
         auto attenuation = 1.0 / (1.0 + 0.22 * R + 0.20 * R * R);
 
-        std::optional<hit_record> shadow = hit_scene(lamp_ray, interval{ 0.001, R });
+        std::optional<intersection> shadow = hit(lamp_ray, interval{ 0.001, R });
 
         if (shadow.has_value()) {
             continue;
@@ -104,13 +104,13 @@ color3 scene::illuminance_v1(const ray& camera_ray, std::string mode, int depth)
         return get_sky(camera_ray);
     }
 
-    auto rec = hit_scene(camera_ray, interval{0.001});
+    auto rec = hit(camera_ray, interval{0.001});
 
     if (!rec.has_value()) {
         return get_sky(camera_ray);
     }
 
-    hit_record rec_value = rec.value();
+    intersection rec_value = rec.value();
 
     if (mode == MODE_DEPT) {
         double gray = std::exp(-rec_value.t);
@@ -143,8 +143,8 @@ color3 scene::illuminance_v1(const ray& camera_ray, std::string mode, int depth)
     exit(1);
 }
 
-std::optional<hit_record> scene::hit_scene(const ray& ray, const interval& interval) {
-    std::optional<hit_record> rec = std::nullopt;
+std::optional<intersection> scene::hit(const ray& ray, const interval& interval) {
+    std::optional<intersection> rec = std::nullopt;
 
     for (auto object : objects) {
         auto new_record = object->hit(ray, interval);
