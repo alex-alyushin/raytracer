@@ -29,39 +29,30 @@ void scene::add_material_model(std::shared_ptr<material_model> model) {
 }
 
 color3 scene::illuminance_v2(const ray& camera_ray, int depth) {
-    if (depth < 0) {
-        return BLACK;
-    }
-
     color3 illum = color3(0.0, 0.0, 0.0);
 
-    // Hit scene
+    if (depth < 0) {
+        return illum;
+    }
 
     std::optional<hit_record> rec = hit_scene(camera_ray, interval{ 0.001 });
 
     if (!rec.has_value()) {
         return illum;
-        // return get_sky(camera_ray);
     }
 
-    hit_record rec_value = rec.value();
-    auto point = rec_value.point;
+    hit_record rec_value    = rec.value();
 
+    auto point              = rec_value.point;
     auto ambient_color      = rec_value.mat->ambient_color;
-    auto ambient_color_e    = rec_value.mat->ambient_color_e;
+    auto emissive_color     = rec_value.mat->emissive_color;
     auto specular_exponent  = rec_value.mat->specular_exponent;
     auto specular_color     = rec_value.mat->specular_color;
     auto diffuse_color      = rec_value.mat->diffuse_color;
 
-    // Recursion
-
-    auto reflected = rec_value.specular_reflected(camera_ray);
-
     if (specular_color.length_squared() > 0.001) {
-        illum += 0.333 * specular_color * illuminance_v2(reflected, depth - 1);
+        illum += 0.333 * specular_color * illuminance_v2(rec_value.get_specular_reflected(camera_ray), depth - 1);
     }
-
-    // Main cycle by lamps
 
     for (auto lamp : lamps) {
         auto lamp_intensity = lamp->intensity;
@@ -81,11 +72,13 @@ color3 scene::illuminance_v2(const ray& camera_ray, int depth) {
             illum += ambient_color;
         }
 
-        if (ambient_color_e.length_squared() > 0.001) {
-            illum += ambient_color_e;
+        if (emissive_color.length_squared() > 0.001) {
+            illum += emissive_color;
         }
 
         if (specular_color.length_squared() > 0.001) {
+            auto reflected = rec_value.get_specular_reflected(camera_ray);
+
             illum += attenuation
                 * lamp_intensity
                 * specular_color
@@ -136,12 +129,12 @@ color3 scene::illuminance_v1(const ray& camera_ray, std::string mode, int depth)
         auto diffuse_color  = rec_value.mat->diffuse_color;
 
         if (specular_color.length_squared() > 0.001) {
-            auto reflected = rec_value.specular_reflected(camera_ray);
+            auto reflected = rec_value.get_specular_reflected(camera_ray);
             return specular_color * illuminance_v1(reflected, mode, depth - 1);
         }
 
         if (diffuse_color.length_squared() > 0.001) {
-            auto reflected = rec_value.diffuse_reflected();
+            auto reflected = rec_value.get_diffuse_reflected();
             return diffuse_color * illuminance_v1(reflected, mode, depth - 1);
         }
     }

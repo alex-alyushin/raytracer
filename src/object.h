@@ -7,9 +7,9 @@
 #include "interval.h"
 #include "hit_record.h"
 
-class hittable {
+class object {
     public:
-        virtual ~hittable() = default;
+        virtual ~object() = default;
         virtual std::optional<hit_record> hit(const ray& ray, const interval& interval) const = 0;
 };
 

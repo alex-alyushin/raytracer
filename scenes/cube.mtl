@@ -28,7 +28,7 @@ newmtl leftSphere
 
 newmtl rightSphere
     Tf 0.10 0.10 0.10
-    Kd 0.02 0.02 0.02
+    #Kd 0.02 0.02 0.02
     Ka 0.005 0.005 0.005
     al 0.0 0.3 0.7
     Ns 1024
@@ -37,8 +37,8 @@ newmtl rightSphere
     illum 7
 
     # Alex
-    # Ks 0.8 0.6 0.2
-    Ks 0.95 0.95 0.95
+    Ks 0.8 0.6 0.2
+    Kd 0.8 0.6 0.2
 
 newmtl floor
     Ns 10.0000

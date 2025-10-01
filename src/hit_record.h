@@ -2,7 +2,7 @@
 #define HIT_RECORD_H
 
 class material_model;
-class hittable;
+class object;
 
 struct hit_record {
     point3 point;
@@ -11,29 +11,32 @@ struct hit_record {
     std::shared_ptr<material_model> mat;
 
     bool front_face;
-    inline void set_face_normal(const ray& ray, const vec3& outward_normal) {
-        front_face = dot(ray.direction(), outward_normal) < 0;
-        normal = front_face ? outward_normal : -outward_normal;
-    }
+    inline void set_front_face(const ray& ray, const vec3& outward_normal);
+    inline void set_normal(const vec3& outward_normal);
 
-    inline ray specular_reflected(const ray& ray_in);
-    inline ray diffuse_reflected();
+    inline ray get_specular_reflected(const ray& ray_in);
+    inline ray get_diffuse_reflected();
 };
 
-inline ray hit_record::specular_reflected(const ray& ray_in) {
-    auto direction = ray_in.direction();
-
-    return ray(
-        point,
-        unit_vector(direction - 2 * dot(direction, normal) * normal)
-    );
+inline void hit_record::set_front_face(const ray& ray, const vec3& outward_normal) {
+    front_face = dot(ray.direction(), outward_normal) < 0;
 }
 
-inline ray hit_record::diffuse_reflected() {
-    return ray(
-        point,
-        unit_vector(normal) + random_unit_vector()
-    );
+inline void hit_record::set_normal(const vec3& outward_normal) {
+    normal = front_face ? outward_normal : -outward_normal;
+}
+
+inline ray hit_record::get_specular_reflected(const ray& ray_in) {
+    auto reflected = ray_in.direction()
+        - 2 * dot(ray_in.direction(), normal) * normal;
+
+    return ray(point, unit_vector(reflected));
+}
+
+inline ray hit_record::get_diffuse_reflected() {
+    auto reflected = unit_vector(normal) + random_unit_vector();
+
+    return ray(point, unit_vector(reflected));
 }
 
 // inline vec3 refraction(const vec3& direction, const hit_record& rec, double refraction_index) {

@@ -1,9 +1,9 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
-#include "hittable.h"
+#include "object.h"
 
-class sphere : public hittable {
+class sphere : public object {
     public:
         sphere(const point3& center, double radius, std::shared_ptr<material_model> model)
             : center(center)
@@ -34,13 +34,16 @@ class sphere : public hittable {
                 }
             }
 
-            hit_record  rec;
+            hit_record rec;
+
             rec.t       = root;
             rec.point   = ray.at(rec.t);
             rec.mat     = mat;
 
             vec3 outward_normal = (rec.point - center) / radius;
-            rec.set_face_normal(ray, outward_normal);
+
+            rec.set_front_face(ray, outward_normal);
+            rec.set_normal(outward_normal);
 
             return rec;
         }

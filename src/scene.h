@@ -32,7 +32,7 @@ class scene {
 
     private:
         std::vector<std::shared_ptr<lamp>> lamps;
-        std::vector<std::shared_ptr<hittable>> objects;
+        std::vector<std::shared_ptr<object>> objects;
         std::unordered_map<std::string, std::shared_ptr<material_model>> materials;
 
         std::optional<hit_record> hit_scene(const ray& ray, const interval& interval);
