@@ -14,6 +14,17 @@ void scene::add_light(const point3& position, const color3& intensity) {
     );
 }
 
+void scene::add_area_light(const point3& position, const color3& intensity, const vec& u, const vec& v) {
+   area_lights.push_back(
+       std::make_shared<area_light>(
+           position,
+           intensity,
+           u,
+           v
+       )
+   );
+}
+
 void scene::add_sphere(const point3& center, double radius, const std::string& name) {
     objects.push_back(
         std::make_shared<sphere>(
@@ -54,45 +65,47 @@ color3 scene::illuminance_v2(const ray& camera_ray, int depth) {
         illum += 0.333 * specular_color * illuminance_v2(rec_value.get_specular_reflected(camera_ray), depth - 1);
     }
 
-    for (auto light : lights) {
-        auto lamp_intensity = light->intensity;
-        auto lamp_vec = light->position - point;
-        auto lamp_ray = ray(point, unit_vector(lamp_vec));
+    for (auto area_light : area_lights) {
+        for (auto light : area_light->sample()) {
+            auto lamp_intensity = light->intensity;
+            auto lamp_vec = light->position - point;
+            auto lamp_ray = ray(point, unit_vector(lamp_vec));
 
-        auto R = lamp_vec.length();
-        auto attenuation = 1.0 / (1.0 + 0.22 * R + 0.20 * R * R);
+            auto R = lamp_vec.length();
+            auto attenuation = 1.0 / (1.0 + 0.22 * R + 0.20 * R * R);
 
-        std::optional<intersection> shadow = hit(lamp_ray, interval{ 0.001, R });
+            std::optional<intersection> shadow = hit(lamp_ray, interval{ 0.001, R });
 
-        if (shadow.has_value()) {
-            continue;
-        }
+            if (shadow.has_value()) {
+                continue;
+            }
 
-        if (ambient_color.length_squared() > 0.001) {
-            illum += ambient_color;
-        }
+            if (ambient_color.length_squared() > 0.001) {
+                illum += ambient_color;
+            }
 
-        if (emissive_color.length_squared() > 0.001) {
-            illum += emissive_color;
-        }
+            if (emissive_color.length_squared() > 0.001) {
+                illum += emissive_color;
+            }
 
-        if (specular_color.length_squared() > 0.001) {
-            auto reflected = rec_value.get_specular_reflected(camera_ray);
+            if (specular_color.length_squared() > 0.001) {
+                auto reflected = rec_value.get_specular_reflected(camera_ray);
 
-            illum += attenuation
-                * lamp_intensity
-                * specular_color
-                * std::pow(
-                    std::max(0.0, dot(lamp_ray.direction(), reflected.direction())),
-                    specular_exponent
-                );
-        }
+                illum += attenuation
+                    * lamp_intensity
+                    * specular_color
+                    * std::pow(
+                        std::max(0.0, dot(lamp_ray.direction(), reflected.direction())),
+                        specular_exponent
+                    );
+            }
 
-        if (diffuse_color.length_squared() > 0.001) {
-            illum += attenuation
-                * lamp_intensity
-                * diffuse_color
-                * std::max(0.0, dot(lamp_ray.direction(), rec_value.normal));
+            if (diffuse_color.length_squared() > 0.001) {
+                illum += attenuation
+                    * lamp_intensity
+                    * diffuse_color
+                    * std::max(0.0, dot(lamp_ray.direction(), rec_value.normal));
+            }
         }
     }
 

@@ -94,7 +94,30 @@ void parser::read_objects(scene& scene, const std::string& filename) {
             }
 
             // Area Light (non-standard)
-           if (tokens[0] == "A") {}
+           if (tokens[0] == "A") {
+                scene.add_area_light(
+                    point3(
+                        std::stod(tokens[1]),   // x
+                        std::stod(tokens[2]),   // y
+                        std::stod(tokens[3])    // z
+                    ),
+                    color3(
+                        std::stod(tokens[4]),   // R
+                        std::stod(tokens[5]),   // G
+                        std::stod(tokens[6])    // B
+                    ),
+                    vec(
+                        std::stod(tokens[7]),   // u
+                        std::stod(tokens[8]),
+                        std::stod(tokens[9])
+                    ),
+                    vec(
+                        std::stod(tokens[10]),  // v
+                        std::stod(tokens[11]),
+                        std::stod(tokens[12])
+                    )
+                );
+           }
 
             // Vertex
             if (tokens[0] == "v") {}
