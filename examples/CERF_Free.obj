@@ -1,7 +1,12 @@
 # 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
 # File Created: 25.09.2020 16:04:53
 
-mtllib CERF_Free.mtl
+mtllib examples/CERF_Free.mtl
+
+usemtl ground
+S 0.0 -10000.0 0.0 10000.0
+
+A -100 300 200 3500 3200 2800 10 0 0 0 0 10
 
 #
 # object ORIGAMI_Cerf
@@ -2209,7 +2214,7 @@ vt 0.7700 0.6705 0.0000
 
 o ORIGAMI_Cerf
 g ORIGAMI_Cerf
-usemtl wire_086086086
+usemtl deer
 s off
 f 1/1/1 2/2/1 3/3/1 4/4/1 
 f 4/4/2 3/3/2 5/5/2 6/6/2 

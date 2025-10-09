@@ -1,0 +1,14 @@
+newmtl ground
+    Kd 0.3 0.3 0.2
+    Ks 0.1 0.1 0.1
+    Ns 30
+    illum 2
+
+newmtl deer
+    Ka 0.05 0.04 0.02
+    Kd 0.8 0.6 0.2
+    Ks 1.0 0.9 0.6
+    Ns 800
+    Ni 1.45
+    d 1.0
+    illum 5

@@ -123,6 +123,10 @@ inline vec operator/(const vec& v, double t) {
 }
 
 inline vec unit_vector(const vec& v) {
+    if (v.length() == 0) {
+        return v;
+    }
+
     return v / v.length();
 }
 

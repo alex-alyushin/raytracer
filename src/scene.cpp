@@ -25,6 +25,53 @@ void scene::add_area_light(const point3& position, const color3& intensity, cons
    );
 }
 
+void scene::add_material(std::shared_ptr<material> model) {
+    materials[model->name] = model;
+}
+
+void scene::add_vertex(const point3& vertex) {
+    vertices.push_back(
+        std::make_shared<point3>(
+            vertex[0],
+            vertex[1],
+            vertex[2]
+        )
+    );
+}
+
+void scene::add_normal(const vec& normal) {
+    normales.push_back(
+        std::make_shared<vec>(
+            normal[0],
+            normal[1],
+            normal[2]
+        )
+    );
+}
+
+void scene::add_polygon(std::vector<int> v_indexes, std::vector<int> vn_indexes, const std::string& name) {
+
+    auto pos = [] (int size, int ind) {
+        return ind > 0 ? (ind - 1) : (ind + size);
+    };
+
+    for (int index = 1; index <= v_indexes.size() - 2; index += 1) {
+        objects.push_back(
+            std::make_shared<triangle>(
+                materials[name],
+
+                vertices[pos(vertices.size(), v_indexes[0])],
+                vertices[pos(vertices.size(), v_indexes[index])],
+                vertices[pos(vertices.size(), v_indexes[index + 1])],
+
+                normales[pos(normales.size(), vn_indexes[0])],
+                normales[pos(normales.size(), vn_indexes[index])],
+                normales[pos(normales.size(), vn_indexes[index + 1])]
+            )
+        );
+    }
+}
+
 void scene::add_sphere(const point3& center, double radius, const std::string& name) {
     objects.push_back(
         std::make_shared<sphere>(
@@ -33,10 +80,6 @@ void scene::add_sphere(const point3& center, double radius, const std::string& n
             materials[name]
         )
     );
-}
-
-void scene::add_material(std::shared_ptr<material> model) {
-    materials[model->name] = model;
 }
 
 color3 scene::illuminance_v2(const ray& camera_ray, int depth) {
@@ -67,6 +110,7 @@ color3 scene::illuminance_v2(const ray& camera_ray, int depth) {
 
     for (auto area_light : area_lights) {
         for (auto light : area_light->sample()) {
+            // @todo: move it to class light
             auto lamp_intensity = light->intensity;
             auto lamp_vec = light->position - point;
             auto lamp_ray = ray(point, unit_vector(lamp_vec));

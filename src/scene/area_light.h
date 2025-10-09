@@ -2,6 +2,7 @@
 #define AREA_LIGHT_H
 
 #include "ray.h"
+#include "light.h"
 
 class area_light {
     public:

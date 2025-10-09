@@ -28,6 +28,41 @@ void parser::read_objects(scene& scene, const std::string& filename) {
     std::string material_name;
     std::string line;
 
+    bool is_first = true;
+    double x_min;
+    double y_min;
+    double z_min;
+    double x_max;
+    double y_max;
+    double z_max;
+
+    // @debug
+    auto update_bounding_box = [&] (double x, double y, double z) {
+        if (is_first) {
+            is_first = false;
+            x_min = x;
+            x_max = x;
+            y_min = y;
+            y_max = y;
+            z_min = z;
+            z_max = z;
+        } else {
+            if (x < x_min) { x_min = x; }
+            if (x > x_max) { x_max = x; }
+            if (y < y_min) { y_min = y; }
+            if (y > y_max) { y_max = y; }
+            if (z < z_min) { z_min = z; }
+            if (z > z_max) { z_max = z; }
+        }
+    };
+
+    // @debug
+    auto print_bounding_box = [&] () {
+        std::cout << "x = " << x_min << " ... " << x_max << "\n";
+        std::cout << "y = " << y_min << " ... " << y_max << "\n";
+        std::cout << "z = " << z_min << " ... " << z_max << "\n";
+    };
+
     while (std::getline(file, line)) {
         std::string word;
         std::vector<std::string> tokens;
@@ -120,19 +155,59 @@ void parser::read_objects(scene& scene, const std::string& filename) {
            }
 
             // Vertex
-            if (tokens[0] == "v") {}
+            if (tokens[0] == "v") {
+                auto x = std::stod(tokens[1]);
+                auto y = std::stod(tokens[2]);
+                auto z = std::stod(tokens[3]);
 
-            // Vertex normale
-            if (tokens[0] == "vn") {}
+                // @debug
+                update_bounding_box(x, y, z);
 
-            // Vertex texture
+                scene.add_vertex(point3(x, y, z));
+            }
+
+            // Normal
+            if (tokens[0] == "vn") {
+                scene.add_normal(
+                    point3(
+                        std::stod(tokens[1]),   // x
+                        std::stod(tokens[2]),   // y
+                        std::stod(tokens[3])    // z
+                    )
+                );
+            }
+
+            // Texture
             if (tokens[0] == "vt") {}
 
             // Face
-            if (tokens[0] == "f") {}
+            if (tokens[0] == "f") {
+                std::vector<int> v_indexes = {};
+                std::vector<int> vn_indexes = {};
+
+                for (int index = 1; index < tokens.size(); index += 1) {
+                    int v, vn;
+                    char comma;
+
+                    std::stringstream ss(tokens[index]);
+                    ss >> v >> comma >> comma >> vn;
+
+                    v_indexes.push_back(v);
+                    vn_indexes.push_back(vn);
+                }
+
+                scene.add_polygon(
+                    v_indexes,
+                    vn_indexes,
+                    material_name
+                );
+            }
 
         }
     }
+
+    // @debug
+    print_bounding_box();
 
     file.close();
 }
