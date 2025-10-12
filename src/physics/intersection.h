@@ -4,18 +4,25 @@
 class material;
 class object;
 
-struct intersection {
-    point3 point;
-    vec normal;
-    double t;
-    std::shared_ptr<material> mat;
+class intersection {
+    public:
+        intersection(material& mat, const point3& point, double t)
+            : mat(mat)
+            , point(point)
+            , t(t) {}
 
-    bool front_face;
-    inline void set_front_face(const ray& ray, const vec& outward_normal);
-    inline void set_normal(const vec& outward_normal);
+        material& mat;
+        point3 point;
+        double t;
 
-    inline ray get_specular_reflected(const ray& ray_in);
-    inline ray get_diffuse_reflected();
+        bool front_face;
+        inline void set_front_face(const ray& ray, const vec& outward_normal);
+
+        vec normal;
+        inline void set_normal(const vec& outward_normal);
+
+        inline ray get_specular_reflected(const ray& ray_in);
+        inline ray get_diffuse_reflected();
 };
 
 inline void intersection::set_front_face(const ray& ray, const vec& outward_normal) {

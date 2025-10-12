@@ -222,9 +222,8 @@ void parser::read_materials(scene& scene, const std::string& filename) {
         exit(1);
     }
 
-    std::string model_name;
-    std::unordered_map<std::string, std::shared_ptr<material>> material_models;
     std::string line;
+    std::vector<material> materials;
 
     while (std::getline(file, line)) {
         std::string word;
@@ -240,13 +239,13 @@ void parser::read_materials(scene& scene, const std::string& filename) {
         if (!tokens.empty()) {
 
             if (tokens[0] == "newmtl") {
-                model_name = tokens[1];
-                material_models[model_name] = std::make_shared<material>();
-                material_models[model_name]->name = model_name;
+                materials.push_back(
+                    material(tokens[1])
+                );
             }
 
             if (tokens[0] == "Ka") {
-                material_models[model_name]->ambient_color = color3(
+                materials.back().ambient_color = color3(
                     std::stod(tokens[1]),
                     std::stod(tokens[2]),
                     std::stod(tokens[3])
@@ -254,7 +253,7 @@ void parser::read_materials(scene& scene, const std::string& filename) {
             }
 
             if (tokens[0] == "Ke") {
-                material_models[model_name]->emissive_color = color3(
+                materials.back().emissive_color = color3(
                     std::stod(tokens[1]),
                     std::stod(tokens[2]),
                     std::stod(tokens[3])
@@ -262,7 +261,7 @@ void parser::read_materials(scene& scene, const std::string& filename) {
             }
 
             if (tokens[0] == "Kd") {
-                material_models[model_name]->diffuse_color = color3(
+                materials.back().diffuse_color = color3(
                     std::stod(tokens[1]),
                     std::stod(tokens[2]),
                     std::stod(tokens[3])
@@ -270,7 +269,7 @@ void parser::read_materials(scene& scene, const std::string& filename) {
             }
 
             if (tokens[0] == "Ks") {
-                material_models[model_name]->specular_color = color3(
+                materials.back().specular_color = color3(
                     std::stod(tokens[1]),
                     std::stod(tokens[2]),
                     std::stod(tokens[3])
@@ -278,8 +277,7 @@ void parser::read_materials(scene& scene, const std::string& filename) {
             }
 
             if (tokens[0] == "Ns") {
-                material_models[model_name]->specular_exponent =
-                    std::stod(tokens[1]);
+                materials.back().specular_exponent = std::stod(tokens[1]);
             }
 
             // @todo: implement also
@@ -288,11 +286,11 @@ void parser::read_materials(scene& scene, const std::string& filename) {
         }
     }
 
-    file.close();
-
-    for (auto& [ name, model ] : material_models) {
-        scene.add_material(model);
+    for (auto& mtl : materials) {
+        scene.add_material(mtl);
     }
+
+    file.close();
 }
 
 #endif

@@ -1,6 +1,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <unordered_map>
 
 #include "camera.h"
 #include "image.h"
@@ -32,7 +33,8 @@ int main(int argc, char* argv[]) {
 
     auto [ input_file, output_file, camera_opts ] = params::read(config);
 
-    scene scene;
+    scene scene; // on the stack
+
     parser::read_objects(scene, input_file);
 
     camera camera;

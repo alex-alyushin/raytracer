@@ -5,10 +5,10 @@
 
 class sphere : public object {
     public:
-        sphere(const point3& center, double radius, std::shared_ptr<material> model)
+        sphere(const point3& center, double radius, material& mtl)
             : center(center)
             , radius(radius)
-            , mat(model) {}
+            , mat(mtl) {}
 
         std::optional<intersection> hit(const ray& ray, const interval& interval) const override {
             auto OC = center - ray.origin();
@@ -34,14 +34,13 @@ class sphere : public object {
                 }
             }
 
-            intersection rec;
-
-            rec.t       = root;
-            rec.point   = ray.at(rec.t);
-            rec.mat     = mat;
+            intersection rec(
+                mat,
+                ray.at(root),
+                root
+            );
 
             vec outward_normal = (rec.point - center) / radius;
-
             rec.set_front_face(ray, outward_normal);
             rec.set_normal(outward_normal);
 
@@ -51,7 +50,7 @@ class sphere : public object {
     private:
         point3 center;
         double radius;
-        std::shared_ptr<material> mat;
+        material& mat;
 };
 
 #endif

@@ -6,21 +6,21 @@
 class triangle : public object {
     public:
         triangle(
-            std::shared_ptr<material> mat,
             std::shared_ptr<point3> vertex_0,
             std::shared_ptr<point3> vertex_1,
             std::shared_ptr<point3> vertex_2,
             std::shared_ptr<vec> normal_0,
             std::shared_ptr<vec> normal_1,
-            std::shared_ptr<vec> normal_2
+            std::shared_ptr<vec> normal_2,
+            material& mtl
         )
-            : mat(mat)
-            , vertex_0(vertex_0)
+            : vertex_0(vertex_0)
             , vertex_1(vertex_1)
             , vertex_2(vertex_2)
             , normal_0(normal_0)
             , normal_1(normal_1)
-            , normal_2(normal_2) {}
+            , normal_2(normal_2)
+            , mat(mtl) {}
 
         vec normal_component(int8_t index) const {
             if (index == 0 && normal_0 != nullptr) {
@@ -88,10 +88,12 @@ class triangle : public object {
                 return std::nullopt;
             }
 
-            intersection rec;
-            rec.t       = t;
-            rec.point   = ray.at(rec.t);
-            rec.mat     = mat;
+            intersection rec(
+                mat,
+                ray.at(t),
+                t
+            );
+
             // rec.set_front_face(ray, n);
             rec.set_normal(normal(rec.point));
 
@@ -99,8 +101,6 @@ class triangle : public object {
         }
 
     private:
-        std::shared_ptr<material> mat;
-
         std::shared_ptr<point3> vertex_0;
         std::shared_ptr<point3> vertex_1;
         std::shared_ptr<point3> vertex_2;
@@ -108,6 +108,8 @@ class triangle : public object {
         std::shared_ptr<vec> normal_0;
         std::shared_ptr<vec> normal_1;
         std::shared_ptr<vec> normal_2;
+
+        material& mat;
 };
 
 #endif
