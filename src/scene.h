@@ -22,9 +22,6 @@ class scene {
     public:
         scene();
 
-        void add_light(const point3& position, const color3& intensity);
-        void add_area_light(const point3& position, const color3& intensity, const vec& u, const vec& v);
-
         void add_material(material& mtl);
 
         void add_vertex(const point3& vertex);
@@ -32,18 +29,22 @@ class scene {
         void add_polygon(std::vector<int> v_indexes, std::vector<int> vn_indexes, const std::string& name);
         void add_sphere(const point3& center, double radius, const std::string& name);
 
+        void add_light(const point3& position, const color3& intensity);
+        void add_area_light(const point3& position, const color3& intensity, const vec& u, const vec& v);
+
         color3 illuminance_v2(const ray& camera_ray, int depth);
         color3 illuminance_v1(const ray& camera_ray, std::string mode, int depth);
 
     private:
-        std::vector<std::shared_ptr<light>>         lights;
-        std::vector<std::shared_ptr<area_light>>    area_lights;
+        std::unordered_map<std::string, material>   materials;
 
-        std::unordered_map<std::string, material> materials;
+        std::vector<point3>     vertices;
+        std::vector<vec>        normales;
+        std::vector<triangle>   triangles;
+        std::vector<sphere>     spheres;
 
-        std::vector<std::shared_ptr<point3>>        vertices;
-        std::vector<std::shared_ptr<vec>>           normales;
-        std::vector<std::shared_ptr<object>>        objects;
+        std::vector<light>      lights;
+        std::vector<area_light> area_lights;
 
         std::optional<intersection> hit(const ray& ray, const interval& interval);
         color3 get_sky(const ray& ray);

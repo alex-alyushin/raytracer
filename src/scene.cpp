@@ -6,23 +6,13 @@ const auto WHITE = color3(1.0, 1.0, 1.0);
 scene::scene() {}
 
 void scene::add_light(const point3& position, const color3& intensity) {
-    lights.push_back(
-        std::make_shared<light>(
-            position,
-            intensity
-        )
-    );
+    light light(position, intensity);
+    lights.push_back(light);
 }
 
 void scene::add_area_light(const point3& position, const color3& intensity, const vec& u, const vec& v) {
-   area_lights.push_back(
-       std::make_shared<area_light>(
-           position,
-           intensity,
-           u,
-           v
-       )
-   );
+    area_light area_light(position, intensity, u, v);
+    area_lights.push_back(area_light);
 }
 
 void scene::add_material(material& mtl) {
@@ -30,23 +20,11 @@ void scene::add_material(material& mtl) {
 }
 
 void scene::add_vertex(const point3& vertex) {
-    vertices.push_back(
-        std::make_shared<point3>(
-            vertex[0],
-            vertex[1],
-            vertex[2]
-        )
-    );
+    vertices.push_back(vertex);
 }
 
 void scene::add_normal(const vec& normal) {
-    normales.push_back(
-        std::make_shared<vec>(
-            normal[0],
-            normal[1],
-            normal[2]
-        )
-    );
+    normales.push_back(normal);
 }
 
 void scene::add_polygon(std::vector<int> v_indexes, std::vector<int> vn_indexes, const std::string& name) {
@@ -56,29 +34,25 @@ void scene::add_polygon(std::vector<int> v_indexes, std::vector<int> vn_indexes,
     };
 
     for (int index = 1; index <= v_indexes.size() - 2; index += 1) {
-        objects.push_back(
-            std::make_shared<triangle>(
-                vertices[pos(vertices.size(), v_indexes[0])],
-                vertices[pos(vertices.size(), v_indexes[index])],
-                vertices[pos(vertices.size(), v_indexes[index + 1])],
+        triangles.emplace_back(
+            vertices[pos(vertices.size(), v_indexes[0])],
+            vertices[pos(vertices.size(), v_indexes[index])],
+            vertices[pos(vertices.size(), v_indexes[index + 1])],
 
-                normales[pos(normales.size(), vn_indexes[0])],
-                normales[pos(normales.size(), vn_indexes[index])],
-                normales[pos(normales.size(), vn_indexes[index + 1])],
+            normales[pos(normales.size(), vn_indexes[0])],
+            normales[pos(normales.size(), vn_indexes[index])],
+            normales[pos(normales.size(), vn_indexes[index + 1])],
 
-                materials.at(name)
-            )
+            materials.at(name)
         );
     }
 }
 
 void scene::add_sphere(const point3& center, double radius, const std::string& name) {
-    objects.push_back(
-        std::make_shared<sphere>(
-            center,
-            radius,
-            materials.at(name)
-        )
+    spheres.emplace_back(
+        center,
+        radius,
+        materials.at(name)
     );
 }
 
@@ -109,10 +83,10 @@ color3 scene::illuminance_v2(const ray& camera_ray, int depth) {
     }
 
     for (auto area_light : area_lights) {
-        for (auto light : area_light->sample()) {
+        for (auto light : area_light.sample()) {
             // @todo: move it to class light
-            auto lamp_intensity = light->intensity;
-            auto lamp_vec = light->position - point;
+            auto lamp_intensity = light.intensity;
+            auto lamp_vec = light.position - point;
             auto lamp_ray = ray(point, unit_vector(lamp_vec));
 
             auto R = lamp_vec.length();
@@ -203,8 +177,18 @@ color3 scene::illuminance_v1(const ray& camera_ray, std::string mode, int depth)
 std::optional<intersection> scene::hit(const ray& ray, const interval& interval) {
     std::vector<intersection> intersections;
 
-    for (auto object : objects) {
-        auto new_record = object->hit(ray, interval);
+    for (auto object : spheres) {
+        auto new_record = object.hit(ray, interval);
+
+        if (new_record.has_value()) {
+            if (intersections.empty() || new_record.value().t < intersections.back().t) {
+                intersections.push_back(new_record.value());
+            }
+        }
+    }
+
+    for (auto object : triangles) {
+        auto new_record = object.hit(ray, interval);
 
         if (new_record.has_value()) {
             if (intersections.empty() || new_record.value().t < intersections.back().t) {

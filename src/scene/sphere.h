@@ -3,14 +3,14 @@
 
 #include "object.h"
 
-class sphere : public object {
+class sphere {
     public:
         sphere(const point3& center, double radius, material& mtl)
             : center(center)
             , radius(radius)
             , mat(mtl) {}
 
-        std::optional<intersection> hit(const ray& ray, const interval& interval) const override {
+        std::optional<intersection> hit(const ray& ray, const interval& interval) const {
             auto OC = center - ray.origin();
             auto H = dot(ray.direction(), OC);
 

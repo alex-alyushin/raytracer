@@ -17,18 +17,18 @@ class area_light {
             , u(u)
             , v(v) {}
 
-        std::vector<std::shared_ptr<light>> sample(int n = 8) {
-            std::vector<std::shared_ptr<light>> sample = {};
+        std::vector<light> sample(int n = 8) {
+            std::vector<light> sample = {};
 
             for (int i = 0; i < 8; i += 1) {
-                sample.push_back(
-                    std::make_shared<light>(
-                        position
-                            + random_double(0.0, 1.0) * u
-                            + random_double(0.0, 1.0) * v,
-                        intensity
-                    )
+                light light(
+                    position
+                        + random_double(0.0, 1.0) * u
+                        + random_double(0.0, 1.0) * v,
+                    intensity
                 );
+
+                sample.push_back(light);
             }
 
             return sample;
