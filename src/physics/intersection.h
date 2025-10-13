@@ -6,19 +6,24 @@ class object;
 
 class intersection {
     public:
-        intersection(material& mat, const point3& point, double t)
+        intersection()
+            : mat()
+            , point(vec(0, 0, 0))
+            , t(0) , front_face()
+            , normal(vec(0, 0, 0)) {}
+
+        intersection(material* mat, const point3& point, double t)
             : mat(mat)
             , point(point)
             , t(t) {}
 
-        material& mat;
+        material* mat;
         point3 point;
         double t;
-
         bool front_face;
-        inline void set_front_face(const ray& ray, const vec& outward_normal);
-
         vec normal;
+
+        inline void set_front_face(const ray& ray, const vec& outward_normal);
         inline void set_normal(const vec& outward_normal);
 
         inline ray get_specular_reflected(const ray& ray_in);

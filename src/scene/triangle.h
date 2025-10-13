@@ -12,7 +12,7 @@ class triangle {
             vec& normal_0,
             vec& normal_1,
             vec& normal_2,
-            material& mtl
+            material* mtl
         )
             : vertex_0(vertex_0)
             , vertex_1(vertex_1)
@@ -39,7 +39,7 @@ class triangle {
             );
         }
 
-        std::optional<intersection> hit(const ray& ray, const interval& interval) const {
+        bool hit(const ray& ray, const interval& interval, intersection& intersection) const {
             constexpr double epsilon = std::numeric_limits<double>::epsilon();
 
             vec edge_1 = vertex_1 - vertex_0;
@@ -49,39 +49,40 @@ class triangle {
             double det = dot(edge_1, ray_cross_edge_2);
 
             if (det > -epsilon && det < epsilon) {
-                return std::nullopt;
+                return false;
             }
 
             vec s = ray.origin() - vertex_0;
             double u = (1.0 / det) * dot(s, ray_cross_edge_2);
 
             if ((u < 0 && std::abs(u) > epsilon) || (u > 1 && std::abs(u - 1) > epsilon)) {
-                return std::nullopt;
+                return false;
             }
 
             vec s_cross_edge_1 = cross(s, edge_1);
             double v = (1.0 / det) * dot(ray.direction(), s_cross_edge_1);
 
             if ((v < 0 && std::abs(v) > epsilon) || (u + v > 1 && std::abs(u + v - 1) > epsilon)) {
-                return std::nullopt;
+                return false;
             }
 
             double t = (1.0 / det) * dot(edge_2, s_cross_edge_1);
 
             if (t < epsilon) {
-                return std::nullopt;
+                return false;
             }
 
-            intersection rec(
-                mat,
-                ray.at(t),
-                t
-            );
+            if (!interval.surrounds(t)) {
+                return false;
+            }
 
-            // rec.set_front_face(ray, n);
-            rec.set_normal(normal(rec.point));
+            intersection.mat = mat;
+            intersection.point = ray.at(t);
+            intersection.t = t;
+            intersection.set_normal(normal(intersection.point));
+            // intersection.set_front_face(ray, n);
 
-            return rec;
+            return true;
         }
 
     private:
@@ -93,7 +94,7 @@ class triangle {
         vec& normal_1;
         vec& normal_2;
 
-        material& mat;
+        material* mat;
 };
 
 #endif

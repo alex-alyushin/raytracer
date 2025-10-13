@@ -10,7 +10,11 @@
 class object {
     public:
         virtual ~object() = default;
-        virtual std::optional<intersection> hit(const ray& ray, const interval& interval) const = 0;
+        virtual bool hit(
+            const ray& ray,
+            const interval& interval,
+            intersection& intersection
+        ) const = 0;
 };
 
 #endif

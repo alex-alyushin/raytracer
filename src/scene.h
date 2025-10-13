@@ -32,10 +32,11 @@ class scene {
         void add_light(const point3& position, const color3& intensity);
         void add_area_light(const point3& position, const color3& intensity, const vec& u, const vec& v);
 
-        color3 illuminance_v2(const ray& camera_ray, int depth);
-        color3 illuminance_v1(const ray& camera_ray, std::string mode, int depth);
+        color3 illuminance(const ray& camera_ray, int depth);
 
     private:
+        bool hit_scene(const ray& ray, const interval& interval, intersection& intersection);
+
         std::unordered_map<std::string, material>   materials;
 
         std::vector<point3>     vertices;
@@ -45,9 +46,6 @@ class scene {
 
         std::vector<light>      lights;
         std::vector<area_light> area_lights;
-
-        std::optional<intersection> hit(const ray& ray, const interval& interval);
-        color3 get_sky(const ray& ray);
 };
 
 #endif

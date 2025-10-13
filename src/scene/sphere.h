@@ -5,12 +5,12 @@
 
 class sphere {
     public:
-        sphere(const point3& center, double radius, material& mtl)
+        sphere(const point3& center, double radius, material* mtl)
             : center(center)
             , radius(radius)
             , mat(mtl) {}
 
-        std::optional<intersection> hit(const ray& ray, const interval& interval) const {
+        bool hit(const ray& ray, const interval& interval, intersection& intersection) const {
             auto OC = center - ray.origin();
             auto H = dot(ray.direction(), OC);
 
@@ -20,7 +20,7 @@ class sphere {
             auto discriminant = H * H - a * c;
 
             if (discriminant < 0) {
-                return std::nullopt;
+                return false;
             }
 
             auto sqrtd = std::sqrt(discriminant);
@@ -30,27 +30,25 @@ class sphere {
                 root = (H + sqrtd) / a;
 
                 if (!interval.surrounds(root)) {
-                    return std::nullopt;
+                    return false;
                 }
             }
 
-            intersection rec(
-                mat,
-                ray.at(root),
-                root
-            );
+            intersection.mat = mat;
+            intersection.point = ray.at(root);
+            intersection.t = root;
 
-            vec outward_normal = (rec.point - center) / radius;
-            rec.set_front_face(ray, outward_normal);
-            rec.set_normal(outward_normal);
-
-            return rec;
+            vec outward_normal = (intersection.point - center) / radius;
+            intersection.set_front_face(ray, outward_normal);
+            intersection.set_normal(outward_normal);
+ 
+            return true;
         }
 
     private:
         point3 center;
         double radius;
-        material& mat;
+        material* mat;
 };
 
 #endif

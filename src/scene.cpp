@@ -43,7 +43,7 @@ void scene::add_polygon(std::vector<int> v_indexes, std::vector<int> vn_indexes,
             normales[pos(normales.size(), vn_indexes[index])],
             normales[pos(normales.size(), vn_indexes[index + 1])],
 
-            materials.at(name)
+            &materials.at(name)
         );
     }
 }
@@ -52,35 +52,29 @@ void scene::add_sphere(const point3& center, double radius, const std::string& n
     spheres.emplace_back(
         center,
         radius,
-        materials.at(name)
+        &materials.at(name)
     );
 }
 
-color3 scene::illuminance_v2(const ray& camera_ray, int depth) {
+color3 scene::illuminance(const ray& camera_ray, int depth) {
     color3 illum = color3(0.0, 0.0, 0.0);
 
     if (depth < 0) {
         return illum;
     }
 
-    std::optional<intersection> rec = hit(camera_ray, interval{ 0.001 });
+    intersection scene_intersection;
 
-    if (!rec.has_value()) {
+    if (!hit_scene(camera_ray, interval{ 0.001 }, scene_intersection)) {
         return illum;
     }
 
-    intersection rec_value  = rec.value();
-
-    auto point              = rec_value.point;
-    auto ambient_color      = rec_value.mat.ambient_color;
-    auto emissive_color     = rec_value.mat.emissive_color;
-    auto specular_exponent  = rec_value.mat.specular_exponent;
-    auto specular_color     = rec_value.mat.specular_color;
-    auto diffuse_color      = rec_value.mat.diffuse_color;
-
-    if (specular_color.length_squared() > 0.001) {
-        illum += 0.333 * specular_color * illuminance_v2(rec_value.get_specular_reflected(camera_ray), depth - 1);
-    }
+    auto point              = scene_intersection.point;
+    auto ambient_color      = scene_intersection.mat->ambient_color;
+    auto emissive_color     = scene_intersection.mat->emissive_color;
+    auto specular_exponent  = scene_intersection.mat->specular_exponent;
+    auto specular_color     = scene_intersection.mat->specular_color;
+    auto diffuse_color      = scene_intersection.mat->diffuse_color;
 
     for (auto area_light : area_lights) {
         for (auto light : area_light.sample()) {
@@ -92,9 +86,8 @@ color3 scene::illuminance_v2(const ray& camera_ray, int depth) {
             auto R = lamp_vec.length();
             auto attenuation = 1.0 / (1.0 + 0.22 * R + 0.20 * R * R);
 
-            std::optional<intersection> shadow = hit(lamp_ray, interval{ 0.001, R });
-
-            if (shadow.has_value()) {
+            intersection shadow;
+            if (hit_scene(lamp_ray, interval{ 0.001, R }, shadow)) {
                 continue;
             }
 
@@ -107,7 +100,7 @@ color3 scene::illuminance_v2(const ray& camera_ray, int depth) {
             }
 
             if (specular_color.length_squared() > 0.001) {
-                auto reflected = rec_value.get_specular_reflected(camera_ray);
+                auto reflected = scene_intersection.get_specular_reflected(camera_ray);
 
                 illum += attenuation
                     * lamp_intensity
@@ -122,91 +115,36 @@ color3 scene::illuminance_v2(const ray& camera_ray, int depth) {
                 illum += attenuation
                     * lamp_intensity
                     * diffuse_color
-                    * std::max(0.0, dot(lamp_ray.direction(), rec_value.normal));
+                    * std::max(0.0, dot(lamp_ray.direction(), scene_intersection.normal));
             }
         }
+    }
+
+    // Recursion
+    if (specular_color.length_squared() > 0.001) {
+        illum += 0.333 * specular_color * illuminance(scene_intersection.get_specular_reflected(camera_ray), depth - 1);
     }
 
     return illum;
 }
 
-color3 scene::illuminance_v1(const ray& camera_ray, std::string mode, int depth) {
-    if (depth < 0) {
-        return get_sky(camera_ray);
-    }
-
-    auto rec = hit(camera_ray, interval{0.001});
-
-    if (!rec.has_value()) {
-        return get_sky(camera_ray);
-    }
-
-    intersection rec_value = rec.value();
-
-    if (mode == MODE_DEPT) {
-        double gray = std::exp(-rec_value.t);
-        return color3(gray, gray, gray);
-    }
-
-    if (mode == MODE_NORM) {
-        double R = (rec_value.normal.x() + 1.0) / 2;
-        double G = (rec_value.normal.y() + 1.0) / 2;
-        double B = (rec_value.normal.z() + 1.0) / 2;
-        return color3(R, G, B);
-    }
-
-    if (mode == MODE_FULL) {
-        auto specular_color = rec_value.mat.specular_color;
-        auto diffuse_color  = rec_value.mat.diffuse_color;
-
-        if (specular_color.length_squared() > 0.001) {
-            auto reflected = rec_value.get_specular_reflected(camera_ray);
-            return specular_color * illuminance_v1(reflected, mode, depth - 1);
-        }
-
-        if (diffuse_color.length_squared() > 0.001) {
-            auto reflected = rec_value.get_diffuse_reflected();
-            return diffuse_color * illuminance_v1(reflected, mode, depth - 1);
-        }
-    }
-
-    std::cerr << "[Render] unknown render mode: " << mode << std::endl;
-    exit(1);
-}
-
-std::optional<intersection> scene::hit(const ray& ray, const interval& interval) {
-    std::vector<intersection> intersections;
+bool scene::hit_scene(const ray& ray, const interval& i, intersection& intersection) {
+    double dist = i.max;
+    bool found = false;
 
     for (auto object : spheres) {
-        auto new_record = object.hit(ray, interval);
-
-        if (new_record.has_value()) {
-            if (intersections.empty() || new_record.value().t < intersections.back().t) {
-                intersections.push_back(new_record.value());
-            }
+        if (object.hit(ray, interval{ i.min, dist }, intersection)) {
+            found = true;
+            dist = i.max;
         }
     }
 
     for (auto object : triangles) {
-        auto new_record = object.hit(ray, interval);
-
-        if (new_record.has_value()) {
-            if (intersections.empty() || new_record.value().t < intersections.back().t) {
-                intersections.push_back(new_record.value());
-            }
+        if (object.hit(ray, interval{ i.min, dist }, intersection)) {
+            found = true;
+            dist = i.max;
         }
     }
 
-    if (intersections.empty()) {
-        return std::nullopt;
-    }
-
-    return intersections.back();
-}
-
-color3 scene::get_sky(const ray& ray) {
-    auto unit_direction = unit_vector(ray.direction());
-    auto a = 0.5 * (unit_direction.y() + 1.0);
-
-    return (1.0 - a) * color3(1.0, 1.0, 1.0) + a * color3(0.5, 0.7, 1.0);
+    return found;
 }
