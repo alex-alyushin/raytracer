@@ -17,21 +17,10 @@ class area_light {
             , u(u)
             , v(v) {}
 
-        std::vector<light> sample(int n = 8) {
-            std::vector<light> sample = {};
-
-            for (int i = 0; i < 8; i += 1) {
-                light light(
-                    position
-                        + random_double(0.0, 1.0) * u
-                        + random_double(0.0, 1.0) * v,
-                    intensity
-                );
-
-                sample.push_back(light);
-            }
-
-            return sample;
+        point3 sample() {
+            return position
+                + random_double(0.0, 1.0) * u
+                + random_double(0.0, 1.0) * v;
         }
 };
 

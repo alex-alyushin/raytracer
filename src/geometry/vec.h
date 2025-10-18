@@ -5,21 +5,60 @@
 #include <iostream>
 
 #include "utils.h"
+#include "object_counter.h"
 
 class vec {
     public:
+        DECLARE_OBJECT_COUNTER()
+
         double e[3];
 
-        vec() : vec(0, 0, 0) {}
+        vec() : vec(0, 0, 0) {
+            INCREMENT_OBJECT_COUNTER();
+        }
 
-        vec(double e0, double e1, double e2) : e{ e0, e1, e2 } {}
+        vec(double e0, double e1, double e2) : e{ e0, e1, e2 } {
+            INCREMENT_OBJECT_COUNTER();
+        }
 
-        double x() const { return e[0]; }
-        double y() const { return e[1]; }
-        double z() const { return e[2]; }
+        vec(const vec& other) : e{ other.e[0], other.e[1], other.e[2] } {
+            INCREMENT_OBJECT_COUNTER();
+        }
 
-        double operator[](int i) const { return e[i]; }
-        double& operator[](int i) { return e[i]; }
+        vec& operator=(const vec& other) {
+            if (this != &other) {
+                e[0] = other.e[0];
+                e[1] = other.e[1];
+                e[2] = other.e[2];
+            }
+            return *this;
+        }
+
+        ~vec() {
+            DECREMENT_OBJECT_COUNTER();
+        }
+
+        // @todo: could return reference?
+
+        double x() const {
+            return e[0];
+        }
+
+        double y() const {
+            return e[1];
+        }
+
+        double z() const {
+            return e[2];
+        }
+
+        double operator[](int i) const {
+            return e[i];
+        }
+
+        double& operator[](int i) {
+            return e[i];
+        }
 
         vec operator-() const {
             return vec(-x(), -y(), -z());
@@ -186,5 +225,7 @@ inline vec random_on_hemisphere(const vec& normal) {
 
     return -on_unit_sphere;
 }
+
+DEFINE_OBJECT_COUNTER(vec)
 
 #endif

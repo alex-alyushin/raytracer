@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <chrono>
+#include "print_object_stats.h"
 
 class logger {
     public:
@@ -25,8 +26,12 @@ class logger {
 
                 std::cout
                     << "\r[Render] pixels rendered = " << progress << "%"
-                    << "\ttime = " << duration_time()
-                    << std::flush;
+                    << "\ttime = " << duration_time();
+                    // << std::flush;
+
+                dump_object_stat();
+
+                std::cout << std::flush;
             }
         }
 

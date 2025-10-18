@@ -2,16 +2,19 @@
 #define TRIANGLE_H
 
 #include "object.h"
+#include "object_counter.h"
 
 class triangle {
     public:
+        DECLARE_OBJECT_COUNTER()
+
         triangle(
-            point3& vertex_0,
-            point3& vertex_1,
-            point3& vertex_2,
-            vec& normal_0,
-            vec& normal_1,
-            vec& normal_2,
+            const point3& vertex_0,
+            const point3& vertex_1,
+            const point3& vertex_2,
+            const vec& normal_0,
+            const vec& normal_1,
+            const vec& normal_2,
             material* mtl
         )
             : vertex_0(vertex_0)
@@ -20,7 +23,13 @@ class triangle {
             , normal_0(normal_0)
             , normal_1(normal_1)
             , normal_2(normal_2)
-            , mat(mtl) {}
+            , mat(mtl) {
+                INCREMENT_OBJECT_COUNTER();
+            }
+
+        ~triangle() {
+            DECREMENT_OBJECT_COUNTER();
+        }
 
         vec normal(const point3& point) const {
             auto triangle_area = [](const point3& v0, const point3& v1, const point3& v2) {
@@ -46,27 +55,27 @@ class triangle {
             vec edge_2 = vertex_2 - vertex_0;
 
             vec ray_cross_edge_2 = cross(ray.direction(), edge_2);
-            double det = dot(edge_1, ray_cross_edge_2);
+            double det = 1 / dot(edge_1, ray_cross_edge_2);
 
-            if (det > -epsilon && det < epsilon) {
+            if (std::abs(det) > (1 / epsilon)) {
                 return false;
             }
 
             vec s = ray.origin() - vertex_0;
-            double u = (1.0 / det) * dot(s, ray_cross_edge_2);
+            double u = det * dot(s, ray_cross_edge_2);
 
             if ((u < 0 && std::abs(u) > epsilon) || (u > 1 && std::abs(u - 1) > epsilon)) {
                 return false;
             }
 
             vec s_cross_edge_1 = cross(s, edge_1);
-            double v = (1.0 / det) * dot(ray.direction(), s_cross_edge_1);
+            double v = det * dot(ray.direction(), s_cross_edge_1);
 
             if ((v < 0 && std::abs(v) > epsilon) || (u + v > 1 && std::abs(u + v - 1) > epsilon)) {
                 return false;
             }
 
-            double t = (1.0 / det) * dot(edge_2, s_cross_edge_1);
+            double t = det * dot(edge_2, s_cross_edge_1);
 
             if (t < epsilon) {
                 return false;
@@ -86,15 +95,17 @@ class triangle {
         }
 
     private:
-        point3& vertex_0;
-        point3& vertex_1;
-        point3& vertex_2;
+        const point3& vertex_0;
+        const point3& vertex_1;
+        const point3& vertex_2;
 
-        vec& normal_0;
-        vec& normal_1;
-        vec& normal_2;
+        const vec& normal_0;
+        const vec& normal_1;
+        const vec& normal_2;
 
         material* mat;
 };
+
+DEFINE_OBJECT_COUNTER(triangle)
 
 #endif

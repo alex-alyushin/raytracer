@@ -64,7 +64,6 @@ color3 scene::illuminance(const ray& camera_ray, int depth) {
     }
 
     intersection scene_intersection;
-
     if (!hit_scene(camera_ray, interval{ 0.001 }, scene_intersection)) {
         return illum;
     }
@@ -76,11 +75,19 @@ color3 scene::illuminance(const ray& camera_ray, int depth) {
     auto specular_color     = scene_intersection.mat->specular_color;
     auto diffuse_color      = scene_intersection.mat->diffuse_color;
 
+    auto has_ambient_color      = ambient_color.length_squared() > 0.001;
+    auto has_emissive_color     = emissive_color.length_squared() > 0.001;
+    auto has_specular_color     = specular_color.length_squared() > 0.001;
+    auto has_diffuse_color      = diffuse_color.length_squared() > 0.001;
+
     for (auto area_light : area_lights) {
-        for (auto light : area_light.sample()) {
+        for (int i = 0; i < 8; i += 1) {
             // @todo: move it to class light
-            auto lamp_intensity = light.intensity;
-            auto lamp_vec = light.position - point;
+
+            auto lightPosition = area_light.sample();
+
+            auto lamp_intensity = area_light.intensity;
+            auto lamp_vec = lightPosition - point;
             auto lamp_ray = ray(point, unit_vector(lamp_vec));
 
             auto R = lamp_vec.length();
@@ -91,15 +98,15 @@ color3 scene::illuminance(const ray& camera_ray, int depth) {
                 continue;
             }
 
-            if (ambient_color.length_squared() > 0.001) {
+            if (has_ambient_color) {
                 illum += ambient_color;
             }
 
-            if (emissive_color.length_squared() > 0.001) {
+            if (has_emissive_color) {
                 illum += emissive_color;
             }
 
-            if (specular_color.length_squared() > 0.001) {
+            if (has_specular_color) {
                 auto reflected = scene_intersection.get_specular_reflected(camera_ray);
 
                 illum += attenuation
@@ -111,7 +118,7 @@ color3 scene::illuminance(const ray& camera_ray, int depth) {
                     );
             }
 
-            if (diffuse_color.length_squared() > 0.001) {
+            if (has_diffuse_color) {
                 illum += attenuation
                     * lamp_intensity
                     * diffuse_color
@@ -132,15 +139,15 @@ bool scene::hit_scene(const ray& ray, const interval& i, intersection& intersect
     double dist = i.max;
     bool found = false;
 
-    for (auto object : spheres) {
-        if (object.hit(ray, interval{ i.min, dist }, intersection)) {
+    for (auto sphere : spheres) {
+        if (sphere.hit(ray, interval{ i.min, dist }, intersection)) {
             found = true;
             dist = i.max;
         }
     }
 
-    for (auto object : triangles) {
-        if (object.hit(ray, interval{ i.min, dist }, intersection)) {
+    for (auto triangle : triangles) {
+        if (triangle.hit(ray, interval{ i.min, dist }, intersection)) {
             found = true;
             dist = i.max;
         }

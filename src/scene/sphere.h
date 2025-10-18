@@ -2,13 +2,22 @@
 #define SPHERE_H
 
 #include "object.h"
+#include "object_counter.h"
 
 class sphere {
     public:
+        DECLARE_OBJECT_COUNTER()
+
         sphere(const point3& center, double radius, material* mtl)
             : center(center)
             , radius(radius)
-            , mat(mtl) {}
+            , mat(mtl) {
+                INCREMENT_OBJECT_COUNTER();
+            }
+
+        ~sphere() {
+            DECREMENT_OBJECT_COUNTER();
+        }
 
         bool hit(const ray& ray, const interval& interval, intersection& intersection) const {
             auto OC = center - ray.origin();
@@ -50,5 +59,7 @@ class sphere {
         double radius;
         material* mat;
 };
+
+DEFINE_OBJECT_COUNTER(sphere)
 
 #endif

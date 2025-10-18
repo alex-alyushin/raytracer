@@ -1,21 +1,36 @@
 #ifndef INTERSECTION_H
 #define INTERSECTION_H
 
+#include "object_counter.h"
+
 class material;
 class object;
 
 class intersection {
     public:
+        DECLARE_OBJECT_COUNTER()
+
         intersection()
             : mat()
             , point(vec(0, 0, 0))
-            , t(0) , front_face()
-            , normal(vec(0, 0, 0)) {}
+            , t(0)
+            , front_face(false)
+            , normal(vec(0, 0, 0)) {
+                INCREMENT_OBJECT_COUNTER();
+            }
 
         intersection(material* mat, const point3& point, double t)
             : mat(mat)
             , point(point)
-            , t(t) {}
+            , t(t)
+            , front_face(false)
+            , normal(vec(0, 0, 0)) {
+                INCREMENT_OBJECT_COUNTER();
+            }
+
+        ~intersection() {
+            DECREMENT_OBJECT_COUNTER();
+        }
 
         material* mat;
         point3 point;
@@ -27,7 +42,6 @@ class intersection {
         inline void set_normal(const vec& outward_normal);
 
         inline ray get_specular_reflected(const ray& ray_in);
-        inline ray get_diffuse_reflected();
 };
 
 inline void intersection::set_front_face(const ray& ray, const vec& outward_normal) {
@@ -45,11 +59,11 @@ inline ray intersection::get_specular_reflected(const ray& ray_in) {
     return ray(point, unit_vector(reflected));
 }
 
-inline ray intersection::get_diffuse_reflected() {
-    auto reflected = unit_vector(normal) + random_unit_vector();
+// inline ray intersection::get_diffuse_reflected() {
+//     auto reflected = unit_vector(normal) + random_unit_vector();
 
-    return ray(point, unit_vector(reflected));
-}
+//     return ray(point, unit_vector(reflected));
+// }
 
 // inline vec refraction(const vec& direction, const intersection& rec, double refraction_index) {
 //     double etai = rec.front_face ? (1 / refraction_index) : refraction_index;
@@ -63,5 +77,7 @@ inline ray intersection::get_diffuse_reflected() {
 
 //     return ray_out_norm + ray_out_tang;
 // }
+
+DEFINE_OBJECT_COUNTER(intersection)
 
 #endif

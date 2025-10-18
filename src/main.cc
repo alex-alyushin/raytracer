@@ -7,6 +7,7 @@
 #include "image.h"
 #include "params.h"
 #include "parser.h"
+#include "print_object_stats.h"
 
 std::pair<std::string, std::string> key_value(const std::string& token) {
     auto pos = token.find('=');
@@ -44,6 +45,9 @@ int main(int argc, char* argv[]) {
     image image{matrix};
     image.post_processing();
     image.store(output_file);
+
+    // @debug
+    print_object_statistics();
 
     return 0;
 }
