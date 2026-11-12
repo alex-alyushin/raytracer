@@ -13,16 +13,14 @@ class intersection {
         intersection()
             : mat()
             , point(vec(0, 0, 0))
-            , t(0)
             , front_face(false)
             , normal(vec(0, 0, 0)) {
                 INCREMENT_OBJECT_COUNTER();
             }
 
-        intersection(material* mat, const point3& point, double t)
+        intersection(material* mat, const point3& point)
             : mat(mat)
             , point(point)
-            , t(t)
             , front_face(false)
             , normal(vec(0, 0, 0)) {
                 INCREMENT_OBJECT_COUNTER();
@@ -34,7 +32,6 @@ class intersection {
 
         material* mat;
         point3 point;
-        double t;
         bool front_face;
         vec normal;
 

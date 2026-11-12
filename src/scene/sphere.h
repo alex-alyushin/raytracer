@@ -47,8 +47,6 @@ class sphere {
 
             intersection.mat = mat;
             intersection.point = ray.at(root);
-            intersection.t = root;
-
             vec outward_normal = (intersection.point - center) / radius;
             intersection.set_front_face(ray, outward_normal);
             intersection.set_normal(outward_normal);

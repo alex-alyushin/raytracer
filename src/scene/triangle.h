@@ -89,8 +89,6 @@ class triangle {
 
             intersection.mat = mat;
             intersection.point = ray.at(t);
-            // а нахуй нужен этот t?
-            intersection.t = t;
             intersection.set_normal(normal(intersection.point));
             // intersection.set_front_face(ray, n);
 
