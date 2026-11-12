@@ -35,7 +35,7 @@ class scene {
         color3 illuminance(const ray& camera_ray, int depth);
 
     private:
-        bool hit_scene(const ray& ray, const interval& interval, intersection& intersection);
+        bool hit_scene(const ray& ray, interval& interval, intersection& intersection);
 
         std::unordered_map<std::string, material>   materials;
 

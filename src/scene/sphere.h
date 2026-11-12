@@ -19,7 +19,7 @@ class sphere {
             DECREMENT_OBJECT_COUNTER();
         }
 
-        bool hit(const ray& ray, const interval& interval, intersection& intersection) const {
+        bool hit(const ray& ray, interval& interval, intersection& intersection) const {
             auto OC = center - ray.origin();
             auto H = dot(ray.direction(), OC);
 
@@ -42,6 +42,8 @@ class sphere {
                     return false;
                 }
             }
+
+            interval.max = root;
 
             intersection.mat = mat;
             intersection.point = ray.at(root);

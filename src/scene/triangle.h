@@ -48,7 +48,7 @@ class triangle {
             );
         }
 
-        bool hit(const ray& ray, const interval& interval, intersection& intersection) const {
+        bool hit(const ray& ray, interval& interval, intersection& intersection) const {
             constexpr double epsilon = std::numeric_limits<double>::epsilon();
 
             vec edge_1 = vertex_1 - vertex_0;
@@ -85,8 +85,11 @@ class triangle {
                 return false;
             }
 
+            interval.max = t;
+
             intersection.mat = mat;
             intersection.point = ray.at(t);
+            // а нахуй нужен этот t?
             intersection.t = t;
             intersection.set_normal(normal(intersection.point));
             // intersection.set_front_face(ray, n);

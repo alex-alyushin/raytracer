@@ -63,8 +63,10 @@ color3 scene::illuminance(const ray& camera_ray, int depth) {
         return illum;
     }
 
+    interval scene_interval{ 0.001 };
     intersection scene_intersection;
-    if (!hit_scene(camera_ray, interval{ 0.001 }, scene_intersection)) {
+
+    if (!hit_scene(camera_ray, scene_interval, scene_intersection)) {
         return illum;
     }
 
@@ -84,17 +86,19 @@ color3 scene::illuminance(const ray& camera_ray, int depth) {
         for (int i = 0; i < 8; i += 1) {
             // @todo: move it to class light
 
-            auto lightPosition = area_light.sample();
+            auto light = area_light.sample();
+            auto intensity = area_light.intensity;
 
-            auto lamp_intensity = area_light.intensity;
-            auto lamp_vec = lightPosition - point;
+            auto lamp_vec = light - point;
             auto lamp_ray = ray(point, unit_vector(lamp_vec));
 
             auto R = lamp_vec.length();
             auto attenuation = 1.0 / (1.0 + 0.22 * R + 0.20 * R * R);
 
-            intersection shadow;
-            if (hit_scene(lamp_ray, interval{ 0.001, R }, shadow)) {
+            interval obstruction_interval{ 0.001, R };
+            intersection obstruction_intersection;
+
+            if (hit_scene(lamp_ray, obstruction_interval, obstruction_intersection)) {
                 continue;
             }
 
@@ -110,7 +114,7 @@ color3 scene::illuminance(const ray& camera_ray, int depth) {
                 auto reflected = scene_intersection.get_specular_reflected(camera_ray);
 
                 illum += attenuation
-                    * lamp_intensity
+                    * intensity
                     * specular_color
                     * std::pow(
                         std::max(0.0, dot(lamp_ray.direction(), reflected.direction())),
@@ -120,7 +124,7 @@ color3 scene::illuminance(const ray& camera_ray, int depth) {
 
             if (has_diffuse_color) {
                 illum += attenuation
-                    * lamp_intensity
+                    * intensity
                     * diffuse_color
                     * std::max(0.0, dot(lamp_ray.direction(), scene_intersection.normal));
             }
@@ -135,21 +139,20 @@ color3 scene::illuminance(const ray& camera_ray, int depth) {
     return illum;
 }
 
-bool scene::hit_scene(const ray& ray, const interval& i, intersection& intersection) {
-    double dist = i.max;
+// тут короче говно!
+
+bool scene::hit_scene(const ray& ray, interval& interval, intersection& intersection) {
     bool found = false;
 
     for (auto sphere : spheres) {
-        if (sphere.hit(ray, interval{ i.min, dist }, intersection)) {
+        if (sphere.hit(ray, interval, intersection)) {
             found = true;
-            dist = i.max;
         }
     }
 
     for (auto triangle : triangles) {
-        if (triangle.hit(ray, interval{ i.min, dist }, intersection)) {
+        if (triangle.hit(ray, interval, intersection)) {
             found = true;
-            dist = i.max;
         }
     }
 
